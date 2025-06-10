@@ -8,7 +8,7 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button"
-import { Menu } from "lucide-react";
+import { Menu, LogIn } from "lucide-react";
 
 export function Header() {
   return (
@@ -29,26 +29,28 @@ export function Header() {
             asChild
             className="md:hidden">
             <Button 
-                className="text-white hover:bg-transparent"
                 variant="ghost"
                 size="icon"
+                className="hover:bg-transparent"
+                aria-label="Abrir Menu"
             >
-                <Menu className="w-4 h-4 text-black"/>
+                <Menu className="size-7 text-black"/>
             </Button>
         </SheetTrigger>
         <SheetContent 
             side="right"
             className="w-[240px] md:w-[300px] z-[9999] bg-gradient-to-b from-cyan-100 via-blue-100 to-indigo-300 text-black">
-            <SheetHeader className="text-center">
-                <SheetDescription 
-                    className='text-gray-900 text-center font-semibold mb-4 p-6'>
-                    Menu de Navegação
-                </SheetDescription>
-                <SheetTitle className="sr-only">
-                    MyClinicFOR
+            <SheetHeader className="left-center">
+                <SheetTitle className="font-bold text-blue-950 mr-7">
+                    Menu   
                 </SheetTitle>
+                <SheetDescription 
+                    className='mt-2text-gray-900 text-center font-semibold'>
+                    Acesse as opções disponíveis
+                    <hr />
+                </SheetDescription>
                 <nav className="font-semibold">
-                   <a href="#" className="text-blue-950 hover:text-rose-600">Profissionais</a>
+                    <a href="#" className="text-blue-950 hover:text-rose-600"><span>Profissionais</span></a>
                 </nav>
             </SheetHeader>
         </SheetContent>
