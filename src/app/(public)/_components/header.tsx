@@ -10,12 +10,14 @@ import {
     SheetTrigger,
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button"
-import { Menu } from "lucide-react";
-
+import { LogIn, Menu } from "lucide-react";
+import { Separator } from '@radix-ui/react-separator';
 
 export function Header() {
 
     const [isOpen, setIsOpen] = useState(false);
+
+    const session = false; // Simulating session state, replace with actual session logic
 
     const navItems = [
         { href: "#profissionais", label: "Profissionais" },
@@ -25,23 +27,66 @@ export function Header() {
     const NavLinks = () => (
         <>
             {navItems.map((item) => (
-                <Button
-                    onClick={() => setIsOpen(false)}
-                    key={item.href}
-                    asChild
-                    variant="ghost"
-                    className=" bg-transparent hover:bg-transparent"
-                >
-                    <Link 
-                        className='text-zinc-900 hover:text-blue-950 font-semibold text-lg'
-                        href={item.href}>
-                        {item.label}
-                    </Link>
-                </Button>
+                isOpen ? (
+                    <Button
+                        onClick={() => setIsOpen(false)}
+                        key={item.href}
+                        variant="ghost"
+                        className=" bg-transparent hover:bg-transparent"
+                    >
+                        <Link 
+                            className='text-zinc-900 hover:text-blue-950 text-sm'
+                            href={item.href}>
+                            {item.label}
+                        </Link>
+                    </Button>
+                ) : (
+                    <Button
+                        onClick={() => setIsOpen(false)}
+                        key={item.href}
+                        variant="ghost"
+                        className=" bg-transparent hover:bg-transparent"
+                    >
+                        <Link 
+                            className='text-zinc-900 hover:text-blue-950 text-base'
+                            href={item.href}>
+                            {item.label}
+                        </Link>
+                    </Button>
+                )
             ))}
+            {(session && isOpen) ? (
+                <div className='flex items-start justify-start'>
+                    <Link
+                    className='ml-4 gap-2 text-zinc-900 hover:text-blue-950 font-semibold mt-1.5 whitespace-nowrap text-sm'
+                        href="/dashboard"
+                    >Acessar clinica</Link>
+                </div>
+            ) : (session && !isOpen) ? (
+                <div className='flex items-start justify-start'>
+                    <Link
+                    className='ml-4 gap-2 text-zinc-900 hover:text-blue-950 font-semibold mt-1.5 text-base whitespace-nowrap'
+                        href="/dashboard"
+                    >Acessar clinica</Link>
+                </div>
+            ): (!session && isOpen) ? (<div className="flex items-center justify-center w-full">
+                    <Button 
+                        onClick={() => setIsOpen(false)}
+                        className="mt-4 flex items-center gap-2 bg-blue-950 text-white hover:bg-blue-900 shadow-blue-200 hover:shadow-md">
+                        <LogIn />
+                        Portal da clinica
+                    </Button>
+                </div>
+            ) :  (<div className="flex items-center justify-center w-full">
+                    <Button 
+                        className="ml-4 flex items-center gap-3 bg-blue-950 text-white hover:bg-blue-900 shadow-blue-200 hover:shadow-md">
+                        <LogIn />
+                        Portal da clinica
+                    </Button>
+                </div>
+            )}
         </>
     );
-
   return (
     <header
         className="fixed top-0 right-0 left-0 w-full z-[999] bg-linear-to-r from-white via-blue-200 to-indigo-200 text-zinc-900 py-4 px-6 flex justify-between items-center"
@@ -52,7 +97,7 @@ export function Header() {
                 <span className="text-blue-950">MyClinic</span><span className="text-rose-600">FOR</span>
             </Link>
         </div>
-      <nav className="hidden md:flex items-center font-semibold text-zinc-900 space-x-4">
+      <nav className="hidden md:flex items-start font-semibold text-zinc-900 space-x-4 text-base">
         <NavLinks />
       </nav>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -62,7 +107,7 @@ export function Header() {
             <Button 
                 variant="ghost"
                 size="icon"
-                className=" bg-blue-50 hover:bg-blue-100 text-zinc-900"
+                className=" bg-blue-50 hover:bg-white text-zinc-900"
                 aria-label="Abrir Menu"
             >
                 <Menu className="size-7 text-zinc-900"/>
@@ -71,7 +116,7 @@ export function Header() {
         <SheetContent 
             side="right"
             className="w-[240px] md:w-[300px] z-[9999] bg-gradient-to-b from-white via-blue-100 to-indigo-200 text-zinc-900 text-shadow-zinc-900">
-            <SheetHeader className="left-center">
+            <SheetHeader className="left-0 p-4 space-y-2">
                 <SheetTitle 
                  className="font-bold text-zinc-900">
                     Menu   
@@ -79,9 +124,8 @@ export function Header() {
                 <SheetDescription 
                     className='text-gray-600 text-left text-sm'>
                     Acesse as opções disponíveis
-                    <hr className='mt-1'/>
                 </SheetDescription>
-                <nav className='flex flex-col space-y-2 mt-4'>
+                <nav className='flex flex-col items-start space-y-2 mt-4 text-sm'>
                     <NavLinks />
                 </nav>
             </SheetHeader>

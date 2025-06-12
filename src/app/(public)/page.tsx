@@ -1,14 +1,14 @@
 import { Header } from "./_components/header";
-import { Footer } from "./_components/footer";
+import { Hero } from "./_components/hero";
+import { Clinicas } from "./_components/clinicas";
 export default function Home() {
   return (
-    <div>
+    <div className="flex flex-col min-h-screen">
       <Header />
-      <main>
-        <h1>Bem-vindo ao MyClinicFOR</h1>
-        <p>Esta é a página pública do aplicativo.</p>
-      </main>
-      <Footer />
+      <div>
+        <Hero />
+      </div>
+      <Clinicas />
     </div>
   );
 }
