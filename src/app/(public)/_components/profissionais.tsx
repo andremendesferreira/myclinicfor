@@ -48,6 +48,96 @@ export function Profissionais() {
                     </Link>
                   </div>
                 </CardContent>
+            </Card>
+             <Card className="overflow-hidden p-0">
+                <CardContent className="p-0">
+                  <div className="relative h-48">
+                    <Image
+                      src={ftProf2}
+                      alt="Profissional B"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div className="flex items-baseline justify-between">
+                        <div >
+                          <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Profissional A</h3>
+                          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold ">Endereço:</span> Rua Exemplo, 123</p>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold">Especialidades:</span> Cardiologia, Dermatologia</p>
+                        </div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    </div>
+                  </div>
+                  <div className="w-full mt-2 mb-4 justify-center flex">
+                    <Link href="/profissional/2">
+                      <Button className="w-full py-2 text-sm font-medium md:text-base bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md">
+                        <CalendarPlus className="w-6 h-6 text-white" />
+                        Agendar Consulta
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+            </Card>
+            <Card className="overflow-hidden p-0">
+                <CardContent className="p-0">
+                  <div className="relative h-48">
+                    <Image
+                      src={ftProf3}
+                      alt="Profissional C"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div className="flex items-baseline justify-between">
+                        <div >
+                          <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Profissional C</h3>
+                          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold ">Endereço:</span> Rua Exemplo, 123</p>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold">Especialidades:</span> Cardiologia, Dermatologia</p>
+                        </div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    </div>
+                  </div>
+                  <div className="w-full mt-2 mb-4 justify-center flex">
+                    <Link href="/profissional/3">
+                      <Button className="w-full py-2 text-sm font-medium md:text-base bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md">
+                        <CalendarPlus className="w-6 h-6 text-white" />
+                        Agendar Consulta
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+            </Card>
+            <Card className="overflow-hidden p-0">
+                <CardContent className="p-0">
+                  <div className="relative h-48">
+                    <Image
+                      src={ftProf4}
+                      alt="Profissional D"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div className="flex items-baseline justify-between">
+                        <div >
+                          <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Profissional D</h3>
+                          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold ">Endereço:</span> Rua Exemplo, 123</p>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold">Especialidades:</span> Cardiologia, Dermatologia</p>
+                        </div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    </div>
+                  </div>
+                  <div className="w-full mt-2 mb-4 justify-center flex">
+                    <Link href="/profissional/4">
+                      <Button className="w-full py-2 text-sm font-medium md:text-base bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md">
+                        <CalendarPlus className="w-6 h-6 text-white" />
+                        Agendar Consulta
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
             </Card> 
           </section>
         </div>
