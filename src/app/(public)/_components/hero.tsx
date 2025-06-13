@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import docImg from '../../../../public/doctor-hero.png'
+import { Stethoscope } from "lucide-react";
 export function Hero() {
   return (
       <section className="bg-white dark:bg-zinc-900">
@@ -13,8 +14,9 @@ export function Hero() {
               <p className="text-base md:text-lg text-zinc-600 dark:text-zinc-400">
                 Somos uma plataforma voltada para profissionais de saúde, com foco em agilidade e eficiência de atendimento de forma prática e organizada.
               </p>
-              <Button className="bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md w-fit px-6 font-semibold">
-                Encontre uma clinica
+              <Button className="sm:mb-4 bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md w-fit px-6 font-semibold">
+                <Stethoscope />
+                Encontre um profissional
               </Button>
             </article>
             <div className="hidden lg:block">

@@ -1,0 +1,56 @@
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import ftProf1 from '../../../../public/prof1.jpg';
+import ftProf2 from '../../../../public/prof2.jpg';
+import ftProf3 from '../../../../public/prof3.png';
+import ftProf4 from '../../../../public/prof4.png';
+import Image from "next/image";
+import Link from "next/link";
+import { CalendarPlus } from "lucide-react";
+
+export function Profissionais() {
+  return (
+      <section className="bg-gray-50 dark:bg-gray-900">
+        <div className="container mx-auto px-4 sn:px-6 lg:px-8 py-4">
+          <h2 className="text-3xl text-center font-bold tracking-tight text-zinc-900 dark:text-white">
+            Profissionais de Saúde
+          </h2>
+          <p className="mb-4 text-center text-base text-zinc-600 dark:text-zinc-400">
+            Encontre o profissional ideal para você.
+          </p>
+          <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            <Card className="overflow-hidden p-0">
+                <CardContent className="p-0">
+                  <div className="relative h-48">
+                    <Image
+                      src={ftProf1}
+                      alt="Profissional A"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <div className="p-4 space-y-4">
+                    <div className="flex items-baseline justify-between">
+                        <div >
+                          <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Profissional A</h3>
+                          <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold ">Endereço:</span> Rua Exemplo, 123</p>
+                          <p className="text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold">Especialidades:</span> Cardiologia, Dermatologia</p>
+                        </div>
+                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>
+                    </div>
+                  </div>
+                  <div className="w-full mt-2 mb-4 justify-center flex">
+                    <Link href="/profissional/1">
+                      <Button className="w-full py-2 text-sm font-medium md:text-base bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md">
+                        <CalendarPlus className="w-6 h-6 text-white" />
+                        Agendar Consulta
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+            </Card> 
+          </section>
+        </div>
+      </section>
+  );
+}

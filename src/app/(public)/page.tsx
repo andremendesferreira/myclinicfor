@@ -1,6 +1,7 @@
 import { Header } from "./_components/header";
 import { Hero } from "./_components/hero";
-import { Clinicas } from "./_components/clinicas";
+import { Profissionais } from "./_components/profissionais";
+import { Footer } from "./_components/footer";
 export default function Home() {
   return (
     <div className="flex flex-col min-h-screen">
@@ -8,7 +9,8 @@ export default function Home() {
       <div>
         <Hero />
       </div>
-      <Clinicas />
+      <Profissionais />
+      <Footer />
     </div>
   );
 }
