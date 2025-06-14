@@ -62,7 +62,7 @@ export function Profissionais() {
                   <div className="p-4 space-y-4">
                     <div className="flex items-baseline justify-between">
                         <div >
-                          <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Profissional A</h3>
+                          <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">Profissional B</h3>
                           <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold ">Endereço:</span> Rua Exemplo, 123</p>
                           <p className="text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold">Especialidades:</span> Cardiologia, Dermatologia</p>
                         </div>
