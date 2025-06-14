@@ -1,6 +1,6 @@
 "use client";
-import { useState } from 'react';
-import Link from 'next/link';
+import { useState } from "react";
+import Link from "next/link";
 import {
     Sheet,
     SheetContent,
@@ -11,18 +11,23 @@ import {
 } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button"
 import { LogIn, Menu } from "lucide-react";
-// import { Separator } from '@radix-ui/react-separator';
+import { useSession } from "next-auth/react";
+import { hgRegister } from "../_actions/login"; 
 
 export function Header() {
 
-    const [isOpen, setIsOpen] = useState(false);
+    const { data: session , status } = useSession();
 
-    const session = false; // Simulating session state, replace with actual session logic
+    const [isOpen, setIsOpen] = useState(false);
 
     const navItems = [
         { href: "#profissionais", label: "Profissionais" },
         // { href: "/contato", label: "Contatos" },
     ]
+
+    async function hgLogin(){
+        await hgRegister("github")
+    }
 
     const NavLinks = () => (
         <>
@@ -55,34 +60,39 @@ export function Header() {
                     </Button>
                 )
             ))}
-            {(session && isOpen) ? (
+            {status === 'loading' ? (
+                <></>
+            ) : (session && isOpen) ? (
                 <div className='flex items-start justify-start'>
                     <Link
-                    className='ml-4 gap-2 text-zinc-900 hover:text-blue-900 font-semibold mt-1.5 whitespace-nowrap text-sm'
+                        className='ml-4 gap-2font-semibold whitespace-nowrap text-sm
+                        bg-emerald-700 text-white hover:bg-emerald-600 shadow-zinc-100 
+                        hover:shadow-sm rounded-md py-1 pr-4 pl-4'
                         href="/dashboard"
                     >Acessar MyClinic</Link>
                 </div>
             ) : (session && !isOpen) ? (
                 <div className='flex items-start justify-start'>
                     <Link
-                    className='ml-4 gap-2 text-zinc-900 hover:text-blue-900 font-semibold mt-1.5 text-base whitespace-nowrap'
+                        className='ml-4 gap-2 font-semibold mt-1.5 text-base whitespace-nowrap
+                        bg-emerald-800 text-white hover:bg-emerald-700 shadow-zinc-100 
+                        hover:shadow-sm rounded-md px-3'
                         href="/dashboard"
                     >Acessar MyClinic</Link>
                 </div>
             ): (!session && isOpen) ? (<div className="flex items-center justify-center w-full">
                     <Button 
-                        onClick={() => setIsOpen(false)}
-                        className="flex items-center gap-2 bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md">
+                        onClick={hgLogin}
+                        className="flex items-center gap-2 bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md ">
                         <LogIn />Portal MyClinic
                     </Button>
                 </div>
             ) :  (<div className="flex items-center justify-center w-full">
-                    <Link href="/login">
-                        <Button 
-                            className="ml-4 flex items-center gap-3 bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md">
-                            <LogIn />Portal MyClinic
-                        </Button>
-                    </Link>
+                    <Button 
+                        onClick={hgLogin}
+                        className="ml-4 flex items-center gap-3 bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md">
+                        <LogIn />Portal MyClinic
+                    </Button>
                 </div>
             )}
         </>

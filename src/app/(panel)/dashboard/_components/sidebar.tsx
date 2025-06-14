@@ -12,10 +12,9 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Button } from '@/components/ui/button';
-import { LogOut, Banknote, CalendarCheck2, ChevronLeft, ChevronRight, Folder, Settings, Menu } from 'lucide-react';
+import { UserRoundCog, BriefcaseBusiness ,LogOut, Banknote, CalendarCheck2, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
-import logoImg from '../../../../../public/imagem2.png'
+
 
 import {
   Collapsible,
@@ -61,6 +60,50 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
                 </Button>
             </div>
         </div>
+        
+        {/* Mostrar icones quando a sidebar estiver recolhida - PC*/}
+
+        {isCollapsed && (
+          <nav className="flex flex-col gap-1 overflow-hidden">
+              <SidebarLink
+                href="/dashboard"
+                label="Agendamentos"
+                pathname={pathname}
+                isCollapsed={isCollapsed}
+                icon={<CalendarCheck2 className='w-6 h-6' />}
+              />
+              <SidebarLink
+                href="/dashboard/services"
+                label="Serviços"
+                pathname={pathname}
+                isCollapsed={isCollapsed}
+                icon={<BriefcaseBusiness className='w-6 h-6' />}
+              />
+              <SidebarLink
+                href="/dashboard/profile"
+                label="Meu perfil"
+                pathname={pathname}
+                isCollapsed={isCollapsed}
+                icon={<UserRoundCog className='w-6 h-6' />}
+              />
+              <SidebarLink
+                href="/dashboard/plans"
+                label="Planos"
+                pathname={pathname}
+                isCollapsed={isCollapsed}
+                icon={<Banknote className='w-6 h-6' />}
+              />
+              <SidebarLink
+                href="/"
+                label="Sair"
+                pathname=""
+                isCollapsed={isCollapsed}
+                icon={<LogOut className='w-6 h-6' />}
+              />
+          </nav>
+        )}
+
+
 
         <Collapsible open={!isCollapsed}>
           <CollapsibleContent>
@@ -81,7 +124,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
                 label="Serviços"
                 pathname={pathname}
                 isCollapsed={isCollapsed}
-                icon={<Folder className='w-6 h-6' />}
+                icon={<BriefcaseBusiness className='w-6 h-6' />}
               />
 
               <span className='text-sm text-gray-400 font-medium mt-1 uppercase'>
@@ -93,7 +136,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
                 label="Meu perfil"
                 pathname={pathname}
                 isCollapsed={isCollapsed}
-                icon={<Settings className='w-6 h-6' />}
+                icon={<UserRoundCog className='w-6 h-6' />}
               />
 
               <SidebarLink
@@ -165,7 +208,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
                   label="Serviços"
                   pathname={pathname}
                   isCollapsedMb={isCollapsedMb}
-                  icon={<Folder className='w-6 h-6' />}
+                  icon={<BriefcaseBusiness className='w-6 h-6' />}
                 />
 
                 <SidebarLinkMb
@@ -173,7 +216,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
                   label="Meu perfil"
                   pathname={pathname}
                   isCollapsedMb={isCollapsedMb}
-                  icon={<Settings className='w-6 h-6' />}
+                  icon={<UserRoundCog className='w-6 h-6' />}
                 />
 
                 <SidebarLinkMb

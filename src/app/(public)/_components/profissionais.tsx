@@ -25,6 +25,7 @@ export function Profissionais() {
                     <Image
                       src={ftProf1}
                       alt="Profissional A"
+                      sizes="(max-width: 400px) 100vw, 33vw"
                       fill
                       className="object-cover"
                     />
@@ -55,6 +56,7 @@ export function Profissionais() {
                     <Image
                       src={ftProf2}
                       alt="Profissional B"
+                      sizes="(max-width: 400px) 100vw, 33vw"
                       fill
                       className="object-cover"
                     />
@@ -85,6 +87,7 @@ export function Profissionais() {
                     <Image
                       src={ftProf3}
                       alt="Profissional C"
+                      sizes="(max-width: 400px) 100vw, 33vw"
                       fill
                       className="object-cover"
                     />
@@ -115,6 +118,7 @@ export function Profissionais() {
                     <Image
                       src={ftProf4}
                       alt="Profissional D"
+                      sizes="(max-width: 400px) 100vw, 33vw"
                       fill
                       className="object-cover"
                     />
