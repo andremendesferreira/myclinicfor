@@ -69,7 +69,7 @@ export function Header() {
                         bg-emerald-700 text-white hover:bg-emerald-600 shadow-zinc-100 
                         hover:shadow-sm rounded-md py-1 pr-4 pl-4'
                         href="/dashboard"
-                    >Acessar MyClinic</Link>
+                    >Acessar Portal</Link>
                 </div>
             ) : (session && !isOpen) ? (
                 <div className='flex items-start justify-start'>
@@ -78,7 +78,7 @@ export function Header() {
                         bg-emerald-800 text-white hover:bg-emerald-700 shadow-zinc-100 
                         hover:shadow-sm rounded-md px-3'
                         href="/dashboard"
-                    >Acessar MyClinic</Link>
+                    >Acessar Portal</Link>
                 </div>
             ): (!session && isOpen) ? (<div className="flex items-center justify-center w-full">
                     <Button 
