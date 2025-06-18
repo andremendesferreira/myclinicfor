@@ -31,12 +31,12 @@ import {
 } from '@/components/ui/dialog'
 
 import { Button } from '@/components/ui/button'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, UserRoundCog, Save } from 'lucide-react'
 
-import imgDef from '../../../../../../public/prof1.jpg'
+import imgTest from '../../../../../../public/prof1.jpg'
 import { cn } from '@/lib/utils'
-import { Prisma } from '@/generated/prisma'
-import { updateProfile } from '../_act/upd-profile'
+
+import { Prisma } from '@prisma/client'
 
 type UserWithSubscription = Prisma.UserGetPayload<{
   include: {
@@ -48,18 +48,13 @@ interface ProfileContentProps {
   user: UserWithSubscription;
 }
 
-export function ProfileContent({ user }: ProfileContentProps) {
-  const [selectedHours, setSelectedHours] = useState<string[]>(user.times ?? [])
+
+export function ProfileContent({ user }: ProfileContentProps ) {
+
+  const [selectedHours, setSelectedHours] = useState<string[]>([])
   const [dialogIsOpen, setDialogIsOpen] = useState(false);
 
-  const form = useProfileForm({
-    name: user.name,
-    address: user.address,
-    phone: user.phone,
-    status: user.status,
-    timeZone: user.timeZone
-  });
-
+  const form = useProfileForm();
 
   function generateTimeSlots(): string[] {
     const hours: string[] = [];
@@ -102,17 +97,12 @@ export function ProfileContent({ user }: ProfileContentProps) {
     zone.startsWith("America/Boa_Vista")
   );
 
-  async function onSubmit(values: ProfileFormData) {
-
-    const response = await updateProfile({
-      name: values.name,
-      address: values.address,
-      status: values.status === 'active' ? true : false,
-      timeZone: values.timeZone,
-      times: selectedHours || []
-    })
-
-    console.log("Resposta: ", response)
+  async function onSubmit(values: ProfileFormData){
+    const profileData = {
+      ...values,
+      times: selectedHours 
+    }
+    console.log("values: ", profileData)
   }
 
 
@@ -121,14 +111,15 @@ export function ProfileContent({ user }: ProfileContentProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card>
-            <CardHeader>
-              <CardTitle>Meu Perfil</CardTitle>
-            </CardHeader>
+              <CardTitle className='flex items-center-safe justify-self-auto ' >
+                <UserRoundCog className="ml-4 w-12 h-12 mr-4 text-emerald-500"/>
+                <span className='text-4xl text-shadow-md lg:text-3xl'> Meu Perfil</span>
+              </CardTitle>
             <CardContent className='space-y-6'>
               <div className='flex justify-center'>
                 <div className='bg-gray-200 relative h-40 w-40 rounded-full overflow-hidden'>
                   <Image
-                    src={user.image ? user.image : imgDef}
+                    src={imgTest}
                     alt="Foto da clinica"
                     fill
                     className='object-cover'
@@ -263,7 +254,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
                       </section >
 
                       <Button
-                        className='w-full'
+                        className='w-full bg-emerald-700 hover:bg-emerald-600'
                         onClick={() => setDialogIsOpen(false)}
                       >
                         Fechar modal
@@ -308,8 +299,8 @@ export function ProfileContent({ user }: ProfileContentProps) {
 
                 <Button
                   type="submit"
-                  className='w-full bg-emerald-500 hover:bg-emerald-400'
-                >
+                  className='w-full bg-emerald-700 hover:bg-emerald-600'
+                ><Save className="w-12 h-12"/>
                   Salvar alterações
                 </Button>
 

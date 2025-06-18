@@ -8,7 +8,7 @@ export default async function Dashboard(){
       redirect("/");
     }
 
-  const user = await getUserData(session.user.id);
+  const user = await getUserData({ userId: session.user?.id })
 
   if (!user) {
     redirect("/")

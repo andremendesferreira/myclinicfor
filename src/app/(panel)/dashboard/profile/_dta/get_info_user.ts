@@ -2,27 +2,34 @@
 
 import prisma from "@/lib/prisma";
 
-export async function getUserData(userId: string){
-    try{
+interface GetUserDataProps {
+  userId: string;
+}
 
-        const user = await prisma.user.findFirst({
-            where: {
-                id: userId                
-            },
-            include: {
-                subscription: true,
-            }
-        })
+export async function getUserData({ userId }: GetUserDataProps) {
+  try {
 
-        if(!user){
-            return null;
-        }
-
-        // console.log(user)
-        return user;
-
-    }catch(err){
-        console.log(err);
-        return;
+    if (!userId) {
+      return null;
     }
+
+    const user = await prisma.user.findFirst({
+      where: {
+        id: userId
+      },
+      include: {
+        subscription: true,
+      }
+    })
+
+    if (!user) {
+      return null;
+    }
+
+    return user;
+
+  } catch (err) {
+    console.log(err);
+    return null;
+  }
 }
