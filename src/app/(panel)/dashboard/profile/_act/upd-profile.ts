@@ -51,7 +51,7 @@ export async function updateProfile(formData: FormSchema){
         })
 
         return {
-            data: "Perfil atualizado com sucesso!"
+            data: `"Meu Perfil", atualizado com sucesso!`
         }
 
     }catch(err){

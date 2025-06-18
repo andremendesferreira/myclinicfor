@@ -31,12 +31,13 @@ import {
 } from '@/components/ui/dialog'
 
 import { Button } from '@/components/ui/button'
-import { ArrowRight } from 'lucide-react'
+import { ArrowRight, UserRoundCog } from 'lucide-react'
 
 import imgDef from '../../../../../../public/prof1.jpg'
 import { cn } from '@/lib/utils'
 import { Prisma } from '@/generated/prisma'
 import { updateProfile } from '../_act/upd-profile'
+import { msgSuccess, msgError, msgWarning, msgInfo } from './custom-toast'
 
 type UserWithSubscription = Prisma.UserGetPayload<{
   include: {
@@ -103,16 +104,35 @@ export function ProfileContent({ user }: ProfileContentProps) {
   );
 
   async function onSubmit(values: ProfileFormData) {
+    try {
 
-    const response = await updateProfile({
-      name: values.name,
-      address: values.address,
-      status: values.status === 'active' ? true : false,
-      timeZone: values.timeZone,
-      times: selectedHours || []
-    })
+      const response = await updateProfile({
+        name: values.name,
+        address: values.address,
+        phone: values.phone,
+        status: values.status === 'active' ? true : false,
+        timeZone: values.timeZone,
+        times: selectedHours || []
+      })
 
-    console.log("Resposta: ", response)
+      if (response.error) {
+          msgError(response.error)
+        return;
+      }
+      
+      msgSuccess(response.data || '')
+  
+      } catch(err) {
+  
+        if (err instanceof Error) {
+          msgError(err.message)
+        } else {
+          msgError('Ocorreu um erro desconhecido')
+        }
+        return;
+
+    }
+
   }
 
 
@@ -121,9 +141,10 @@ export function ProfileContent({ user }: ProfileContentProps) {
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card>
-            <CardHeader>
-              <CardTitle>Meu Perfil</CardTitle>
-            </CardHeader>
+              <CardTitle className='flex items-center-safe justify-self-auto ' >
+                <UserRoundCog className="ml-4 w-10 h-10 mr-4 text-emerald-500"/>
+                <span className='text-3xl text-shadow-md lg:text-2xl'> Meu Perfil</span>
+              </CardTitle>
             <CardContent className='space-y-6'>
               <div className='flex justify-center'>
                 <div className='bg-gray-200 relative h-40 w-40 rounded-full overflow-hidden'>
@@ -229,16 +250,16 @@ export function ProfileContent({ user }: ProfileContentProps) {
                   <Dialog open={dialogIsOpen} onOpenChange={setDialogIsOpen} >
                     <DialogTrigger asChild>
                       <Button variant="outline" className='w-full justify-between'>
-                        Clique aqui para selecionar horários
+                        {user.times ? 'Clique aqui para modificar os horários' : 'Clique aqui para cadastrar horários' }
                         <ArrowRight className='w-5 h-5' />
                       </Button>
                     </DialogTrigger>
 
                     <DialogContent>
                       <DialogHeader>
-                        <DialogTitle>Horários da clinica</DialogTitle>
+                        <DialogTitle>Horários de atendimento</DialogTitle>
                         <DialogDescription>
-                          Selecione abaixo os horários de funcionamento da clinica:
+                          Selecione abaixo os horários de funcionamento:
                         </DialogDescription>
                       </DialogHeader>
 
@@ -308,7 +329,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
 
                 <Button
                   type="submit"
-                  className='w-full bg-emerald-500 hover:bg-emerald-400'
+                  className='w-full bg-emerald-600 hover:bg-emerald-500'
                 >
                   Salvar alterações
                 </Button>
