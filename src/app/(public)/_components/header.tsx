@@ -40,7 +40,7 @@ export function Header() {
                         className=" bg-transparent hover:bg-transparent"
                     >
                         <Link 
-                            className='text-zinc-900 hover:text-blue-900 text-sm '
+                            className='text-zinc-900 hover:text-blue-900 text-sm font-semibold'
                             href={item.href}>
                             {item.label}
                         </Link>
@@ -53,7 +53,7 @@ export function Header() {
                         className=" bg-transparent hover:bg-transparent"
                     >
                         <Link 
-                            className='text-zinc-900 hover:text-blue-900 text-base '
+                            className='text-zinc-900 hover:text-blue-900 text-base font-semibold'
                             href={item.href}>
                             {item.label}
                         </Link>
@@ -65,20 +65,22 @@ export function Header() {
             ) : (session && isOpen) ? (
                 <div className='flex items-start justify-start'>
                     <Link
-                        className='ml-4 gap-2font-semibold whitespace-nowrap text-sm
+                        className='flex items-center justify-start
+                        ml-4 gap-2 font-semibold whitespace-nowrap text-sm
                         bg-emerald-700 text-white hover:bg-emerald-600 shadow-zinc-100 
-                        hover:shadow-sm rounded-md py-1 pr-4 pl-4'
+                        hover:shadow-sm rounded-sm py-1 pr-4 pl-4 pb-1'
                         href="/dashboard"
-                    >Acessar Portal</Link>
+                    ><LogIn className="w-5 h-5"/>Acessar Portal</Link>
                 </div>
             ) : (session && !isOpen) ? (
                 <div className='flex items-start justify-start'>
                     <Link
-                        className='ml-4 gap-2 font-semibold mt-1.5 text-base whitespace-nowrap
+                        className='flex items-center justify-start
+                        ml-4 gap-2 font-semibold mt-1.5 text-base whitespace-nowrap
                         bg-emerald-800 text-white hover:bg-emerald-700 shadow-zinc-100 
-                        hover:shadow-sm rounded-md px-3'
+                        hover:shadow-sm rounded-sm px-3 pb-1'
                         href="/dashboard"
-                    >Acessar Portal</Link>
+                    ><LogIn className="w-6 h-6 pt-1"/>Acessar Portal</Link>
                 </div>
             ): (!session && isOpen) ? (<div className="flex items-center justify-center w-full">
                     <Button 

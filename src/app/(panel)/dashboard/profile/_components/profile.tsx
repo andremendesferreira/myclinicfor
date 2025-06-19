@@ -37,7 +37,8 @@ import imgDef from '../../../../../../public/prof1.jpg'
 import { cn } from '@/lib/utils'
 import { Prisma } from '@/generated/prisma'
 import { updateProfile } from '../_act/upd-profile'
-import { msgSuccess, msgError, msgWarning, msgInfo } from './custom-toast'
+import { msgSuccess, msgError, msgWarning, msgInfo } from '@/components/custom-toast'
+import { formatPhone, extractFormatPhone } from '@/app/utils/formatPhone';
 
 type UserWithSubscription = Prisma.UserGetPayload<{
   include: {
@@ -56,7 +57,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
   const form = useProfileForm({
     name: user.name,
     address: user.address,
-    phone: user.phone,
+    phone: formatPhone(user.phone || ''),
     status: user.status,
     timeZone: user.timeZone
   });
@@ -109,7 +110,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
       const response = await updateProfile({
         name: values.name,
         address: values.address,
-        phone: values.phone,
+        phone: extractFormatPhone(values.phone ?? '') || '',
         status: values.status === 'active' ? true : false,
         timeZone: values.timeZone,
         times: selectedHours || []
@@ -206,7 +207,11 @@ export function ProfileContent({ user }: ProfileContentProps) {
                       <FormControl>
                         <Input
                           {...field}
-                          placeholder='Digite o telefone...'
+                          placeholder='(99) 99999-9999'
+                          onChange={ (e) => {
+                            const formattedValue = formatPhone(e.target.value)
+                            field.onChange(formattedValue)
+                          }}
                         />
                       </FormControl>
                       <FormMessage />
@@ -287,7 +292,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
                         className='w-full'
                         onClick={() => setDialogIsOpen(false)}
                       >
-                        Fechar modal
+                        Sair
                       </Button>
 
                     </DialogContent>
