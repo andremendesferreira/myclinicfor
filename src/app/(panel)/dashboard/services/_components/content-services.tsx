@@ -12,6 +12,6 @@ export async function ContentServices({ userId, status }: ContentServicesProps){
     const services = await getUserServicesData({userId: userId, status: status})
 
     return(
-        <ServicesList />
+        <ServicesList services={services || []}/>
     )
 }

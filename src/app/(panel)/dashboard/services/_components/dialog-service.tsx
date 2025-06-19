@@ -1,7 +1,7 @@
 "use client"
-
-import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { useDialogServiceForm } from "./dialog-service-form"
+import { useState } from 'react';
+import { DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useDialogServiceForm, DialogServiceFormData } from "./dialog-service-form";
 import {
   Form,
   FormControl,
@@ -9,13 +9,72 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { convertRealToCents } from '@/app/utils/convertCurrency';
+import { creteNewService } from '../_act/create-service';
+import { msgSuccess, msgError, msgWarning, msgInfo } from '@/components/custom-toast';
 
-export function DialogService() {
+interface DialogServiceProps {
+  closeModal: () => void;
+}
 
-  const form = useDialogServiceForm()
+
+export function DialogService({ closeModal }: DialogServiceProps) {
+
+  const form = useDialogServiceForm();
+  const [loading, setLoading] = useState(false);
+
+  async function onSubmit(values: DialogServiceFormData){
+    setLoading(true);
+    const priceInCents = convertRealToCents(values.price)
+    const hours = parseInt(values.hours) || 1;
+    const minutes = parseInt(values.minutes) || 0;
+    const duration = (hours * 60 ) + minutes;
+
+    const response = await creteNewService({
+      name: values.name,
+      price: priceInCents,
+      duration: duration
+    })
+
+    setLoading(false);
+
+    if(response.error){
+      msgError(response.error);
+      return;
+    }
+
+    msgSuccess("Serviço cadastrado com sucesso!");
+    
+    handleCloseModal();
+
+  }
+
+  function handleCloseModal(){
+    form.reset();
+    closeModal();
+  }
+
+  function changeCurrency(event: React.ChangeEvent<HTMLInputElement>){
+    let { value } = event.target;
+    // Remover todos os caracteres não numéricos
+    value = value.replace(/\D/g,'');
+    
+    if(value){
+      // Valores em reais multiplicado por cem (* 100)
+      // Valores em centavos dividido por cem  (/ 100)
+      value = (parseInt(value,10)/100).toFixed(2);
+      value = value.replace('.', ',');
+      value = value.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    }
+
+    event.target.value = value;
+
+    form.setValue("price", value);
+  }
+
 
   return (
     <>
@@ -27,7 +86,9 @@ export function DialogService() {
       </DialogHeader>
                                     
       <Form {...form}>
-        <form className="space-y-2">
+        <form
+        onSubmit={form.handleSubmit(onSubmit)}
+        className="space-y-2">
 
           <div className="flex flex-col">
             <FormField
@@ -62,6 +123,7 @@ export function DialogService() {
                     <Input
                       {...field}
                       placeholder="Ex: 150,00"
+                      onChange={changeCurrency}
                     />
                   </FormControl>
                   <FormMessage />
@@ -116,10 +178,11 @@ export function DialogService() {
             />
           </div>
 
-          <Button type="submit" className="w-full font-semibold text-white bg-emerald-700 hover:bg-emerald-600 hover:shadow-sm hover:shadow-emerald-200">
-            Salvar serviço
+          <Button 
+            disabled={loading}
+            type="submit" className="w-full font-semibold text-white bg-emerald-700 hover:bg-emerald-600 hover:shadow-sm hover:shadow-emerald-200">
+            {loading ? "Cadastrando..." : "Salvar serviço"}
           </Button>
-
         </form>
       </Form>
     </>

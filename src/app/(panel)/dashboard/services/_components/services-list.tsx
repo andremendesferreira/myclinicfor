@@ -18,10 +18,19 @@ import {
     CardTitle,
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { BriefcaseBusiness, Plus } from 'lucide-react';
-import { DialogService } from './dialog-service'
+import { BriefcaseBusiness, Pencil, Plus, X } from 'lucide-react';
+import { DialogService } from './dialog-service';
+import { Service } from '@/generated/prisma';
+import { convertCentsToReal } from '@/app/utils/convertCurrency';
+import { formatCurrecy } from '@/app/utils/formatCurrency';
+ 
+interface ServicesListProps {
+    services: Service[]
+}
 
-export function ServicesList(){
+
+
+export function ServicesList({ services }: ServicesListProps){
 
     const [isDialogOpen, setIsDialogOpen ] = useState(false)
 
@@ -40,9 +49,44 @@ export function ServicesList(){
                             </Button>
                         </DialogTrigger>
                         <DialogContent>
-                            <DialogService />
+                            <DialogService 
+                                closeModal={() => {
+                                    setIsDialogOpen(false)
+                                }}
+                            />
                         </DialogContent>
                     </CardHeader>
+                    <CardContent>
+                        <section className="space-y-4 ">
+                            {services.map(service => (
+                                <article key={service.id}
+                                         className="flex items-center justify-between"
+                                >
+                                    <div className="flex items-center justify-between space-x-2">
+                                        <span className="font-semibold">{service.name}</span>
+                                        <span> - </span>
+                                        <span className="font-semibold text-zinc-600">{formatCurrecy(convertCentsToReal(service.price.toString()))}</span>
+                                    </div>
+                                    <div>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={()=>{}}
+                                        >
+                                            <Pencil className="w-4 h-4"/>
+                                        </Button>
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={()=>{}}
+                                        >
+                                            <X className="w-4 h-4"/>
+                                        </Button>
+                                    </div>
+                                </article>
+                            ))}
+                        </section>
+                    </CardContent>
                 </Card>
             </section>
         </Dialog>
