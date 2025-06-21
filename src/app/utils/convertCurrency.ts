@@ -25,6 +25,6 @@ export function convertRealToCents(amount: string){
  */
 export function convertCentsToReal(amount: string){
     const numericPrice = parseFloat(amount);
-    const valueInCents = Math.round(numericPrice / 100);
+    const valueInCents = (numericPrice / 100);
     return valueInCents;
 }

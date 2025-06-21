@@ -4,7 +4,7 @@ import prisma from "@/lib/prisma";
 
 interface GetUserServicesDataProps {
   userId: string;
-  status: boolean | true
+  status?: boolean
 }
 
 export async function getUserServicesData({ userId, status }: GetUserServicesDataProps) {
@@ -14,18 +14,35 @@ export async function getUserServicesData({ userId, status }: GetUserServicesDat
       throw new Error("Falha ao buscar serviços.");
     }
 
-    const services = await prisma.service.findMany({
-      where: {
-        userId: userId,
-        status: status? true : false
+    if(status === undefined){
+      const services = await prisma.service.findMany({
+        where: {
+          userId: userId
+        }
+      })
+
+      if (!services) {
+        return null;
       }
-    })
+    
+      return services;
+      
+    } else {
 
-    if (!services) {
-      return null;
+      const services = await prisma.service.findMany({
+        where: {
+          userId: userId,
+          status: status
+        }
+      })
+
+      if (!services) {
+        return null;
+      }
+    
+      return services;
+      
     }
-
-    return services;
 
   } catch (err) {
     console.log(err);

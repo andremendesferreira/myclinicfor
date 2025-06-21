@@ -3,13 +3,12 @@ import { ServicesList } from './services-list';
 
 interface ContentServicesProps{
     userId: string;
-    status: boolean | true;
 }
 
 
-export async function ContentServices({ userId, status }: ContentServicesProps){
-
-    const services = await getUserServicesData({userId: userId, status: status})
+export async function ContentServices({ userId }: ContentServicesProps){
+    
+    const services = await getUserServicesData({userId: userId})
 
     return(
         <ServicesList services={services || []}/>
