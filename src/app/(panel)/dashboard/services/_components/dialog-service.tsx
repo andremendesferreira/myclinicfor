@@ -14,24 +14,74 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { convertRealToCents } from '@/app/utils/convertCurrency';
 import { creteNewService } from '../_act/create-service';
+import { updateService } from '../_act/update-service';
 import { msgSuccess, msgError, msgWarning, msgInfo } from '@/components/custom-toast';
 
 interface DialogServiceProps {
   closeModal: () => void;
+  serviceId?: string ;
+  initialValues?: {
+    name: string;
+    price: string;
+    hours: string;
+    minutes: string;
+  }
 }
 
 
-export function DialogService({ closeModal }: DialogServiceProps) {
+export function DialogService({ closeModal, initialValues, serviceId }: DialogServiceProps) {
 
-  const form = useDialogServiceForm();
+  const form = useDialogServiceForm({initialValues: initialValues});
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(values: DialogServiceFormData){
     setLoading(true);
     const priceInCents = convertRealToCents(values.price)
-    const hours = parseInt(values.hours) || 1;
+    const hours = parseInt(values.hours) || 0;
     const minutes = parseInt(values.minutes) || 0;
     const duration = (hours * 60 ) + minutes;
+
+    async function editServiceById({ 
+    serviceId, 
+    name, 
+    priceInCents, 
+    duration } : {
+      serviceId: string,
+      name: string,
+      priceInCents: number,
+      duration: number
+    }) {
+      const response2 = await updateService({
+        serviceId: serviceId,
+        name: name,
+        price: priceInCents,
+        duration: duration
+      })
+
+      setLoading(false);
+
+      if(response2.error){
+        msgError(response2.error);
+        return;
+      }
+
+      msgSuccess(response2.data || 'Serviço atualizado com sucesso!');
+      handleCloseModal();
+
+    }
+
+    if(serviceId) {
+      await editServiceById({
+        serviceId: serviceId,
+        name: values.name,
+        priceInCents: priceInCents,
+        duration: duration
+      })
+
+      setLoading(false);
+      return;
+    }
+
 
     const response = await creteNewService({
       name: values.name,
@@ -46,7 +96,7 @@ export function DialogService({ closeModal }: DialogServiceProps) {
       return;
     }
 
-    msgSuccess("Serviço cadastrado com sucesso!");
+    msgSuccess('Serviço cadastrado com sucesso!');
     
     handleCloseModal();
 
@@ -181,7 +231,7 @@ export function DialogService({ closeModal }: DialogServiceProps) {
           <Button 
             disabled={loading}
             type="submit" className="w-full font-semibold text-white bg-emerald-700 hover:bg-emerald-600 hover:shadow-sm hover:shadow-emerald-200">
-            {loading ? "Cadastrando..." : "Salvar serviço"}
+            {loading ? "Carregando..." : `${serviceId ? "Atualizar serviço " : "Cadastrar serviço"}`}
           </Button>
         </form>
       </Form>

@@ -86,14 +86,14 @@ export function Header() {
                     <Button 
                         onClick={hgLogin}
                         className="flex items-center gap-2 bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md ">
-                        <LogIn />Portal MyClinic
+                        <LogIn />Portal MyClinicSOL
                     </Button>
                 </div>
             ) :  (<div className="flex items-center justify-center w-full">
                     <Button 
                         onClick={hgLogin}
-                        className="ml-4 flex items-center gap-3 bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md">
-                        <LogIn />Portal MyClinic
+                        className="ml-3 flex items-center gap-3 bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md">
+                        <LogIn />Portal MyClinicSOL
                     </Button>
                 </div>
             )}
@@ -105,7 +105,7 @@ export function Header() {
     >
         <div className="container mx-auto flex items-center justify-between">
             <Link href="/" className="text-3xl font-bold">
-                <span className="text-blue-950">MyClinic</span><span className="text-emerald-500">FOR</span>
+                <span className="text-blue-950">MyClinic</span><span className="text-emerald-500">SOL</span>
             </Link>
         </div>
       <nav className="hidden md:flex items-start font-semibold text-zinc-900 space-x-4 text-base transition-all duration-300 ease-in-out">

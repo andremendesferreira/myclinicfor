@@ -25,6 +25,8 @@ import { Service } from '@/generated/prisma';
 import { convertCentsToReal } from '@/app/utils/convertCurrency';
 import { formatCurrecy } from '@/app/utils/formatCurrency';
 import { deleteService, inativeService } from '../_act/delete-service';
+import { msgError, msgSuccess } from '@/components/custom-toast';
+
  
 interface ServicesListProps {
     services: Service[]
@@ -34,15 +36,35 @@ interface ServicesListProps {
 
 export function ServicesList({ services }: ServicesListProps){
 
+    // Diálogo de serviço.
     const [ isDialogOpen, setIsDialogOpen ] = useState(false);
+    // Diálo de edição de serviço
+    const [ isEditService, setIsEditService] = useState<null | Service>(null);
     // Diálogo de autorização de remoção de serviço.
     const [ isAuthorizationDialogOpen, setIsAuthorizationDialogOpen ] = useState(false);
-    function handleInactiveService(serviceId: string, status: boolean){
-        inativeService({serviceId: serviceId, status: status});
+
+    async function handleInactiveService(serviceId: string, status: boolean){
+       const response = await inativeService({serviceId: serviceId, status: status});
+        if(response.error){
+            msgError(response.error);
+        }
+        msgSuccess(response.data || `${status? "Serviço inativado com sucesso." : "Serviço ativado com sucesso" }`);
     }
+    // Deletar serviço
     function handleDeleteService(serviceId: string){
         deleteService({serviceId: serviceId});
     }
+    // Editar serviço
+    function handleUpdateService(service: Service){
+        console.log("Valores do Serviço: ",service);
+    }
+    // Selecionar serviço
+    function handleSelectService(service: Service){
+        setIsEditService(service);
+        setIsDialogOpen(true);
+    }
+
+    
 
     return(
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
@@ -58,11 +80,25 @@ export function ServicesList({ services }: ServicesListProps){
                                 <Plus className="w-4 h-4 "/>
                             </Button>
                         </DialogTrigger>
-                        <DialogContent>
+                        <DialogContent
+                            onInteractOutside={(e) => {
+                                e.preventDefault();
+                                setIsDialogOpen(false);
+                                setIsEditService(null);
+                            }}
+                        >
                             <DialogService 
                                 closeModal={() => {
-                                    setIsDialogOpen(false)
+                                    setIsDialogOpen(false);
+                                    setIsEditService(null);
                                 }}
+                                serviceId={isEditService? isEditService.id : undefined}
+                                initialValues={isEditService ? {
+                                    name: isEditService.name,
+                                    price: (isEditService.price / 100).toFixed(2).replace(".",","),
+                                    hours: Math.floor(isEditService.duration / 60).toString(),
+                                    minutes: (isEditService.duration % 60).toString(),
+                                } : undefined }
                             />
                         </DialogContent>
                     </CardHeader>
@@ -80,7 +116,7 @@ export function ServicesList({ services }: ServicesListProps){
                                         /></div>
                                     <div className="space-x-3">
                                         <span>Editar</span>
-                                        <span>Ativar</span>
+                                        <span>Alterar</span>
                                         <span>Excluir</span>
                                     </div>
                                 </div>
@@ -98,7 +134,7 @@ export function ServicesList({ services }: ServicesListProps){
                                         <Button
                                             variant="ghost"
                                             size="icon"
-                                            onClick={()=>{}}
+                                            onClick={()=>{handleSelectService(service)}}
                                             className="ml-2 mr-1"
                                         >
                                             <Pencil className="w-4 h-4"/>
@@ -107,7 +143,7 @@ export function ServicesList({ services }: ServicesListProps){
                                             variant="ghost"
                                             size="icon"
                                             onClick={()=> handleInactiveService(service.id, service.status)}
-                                            className="ml-2 mr-2"
+                                            className="ml-3 mr-1"
                                         >
                                             { service.status ? 
                                                 ( <ToggleRight className="w-4 h-4 text-green-500" />) :
@@ -119,7 +155,7 @@ export function ServicesList({ services }: ServicesListProps){
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="ml-2 mr-2"
+                                                    className="ml-3 mr-1"
                                                 >
                                                     <Trash className="w-4 h-4 text-red-700" />
                                                 </Button>
