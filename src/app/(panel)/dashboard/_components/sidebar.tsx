@@ -12,7 +12,7 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Button } from '@/components/ui/button';
-import { Banknote, CalendarCheck2, ChevronLeft, ChevronRight, BriefcaseBusiness, Menu, LogOut, UserRoundCog } from 'lucide-react';
+import { Banknote, CalendarCheck2, ChevronLeft, ChevronRight, BriefcaseBusiness, Menu, LogOut, UserRoundCog, DoorOpen } from 'lucide-react';
 import Link from 'next/link';
 import { signOut, useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
@@ -152,7 +152,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
                 pathname=""
                 isLogOut={true}
                 isCollapsed={isCollapsed}
-                icon={<LogOut className='w-6 h-6' />}
+                icon={<DoorOpen className='w-full h-full' />}
               />
 
             </nav>
@@ -232,7 +232,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
                   pathname=""
                   isCollapsed={isCollapsed}
                   isLogOut={true}
-                  icon={<LogOut className='w-6 h-6' />}
+                  icon={<DoorOpen className='w-6 h-6' />}
                 />
               </nav>
             </SheetContent>
@@ -283,11 +283,12 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
     ) : (
         <Button
           variant="ghost"
+          size="lg"
           onClick={ async () => { await LogOutSystem() }}
-          className="m-0 w-full h-full rounded-md text-gray-700 hover:bg-white hover:text-blue-800"
+          className="w-full h-full gap-2 px-3 py-2 rounded-md transition-colors text-gray-700 hover:bg-white hover:text-blue-800"
         >
           <div className='flex items-center rounded-md w-full h-full p-0 m-0'>
-            <span className='w-7 h-7 pt-1 text-base'>{icon}</span>
+            <span className='w-6 h-6 mr-2'><DoorOpen className="!w-6 !h-6" /></span>
             {!isCollapsed && <span className="text-base">{label}</span>}
           </div>
         </Button>
