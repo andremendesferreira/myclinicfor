@@ -86,14 +86,14 @@ export function Header() {
                     <Button 
                         onClick={hgLogin}
                         className="flex items-center gap-2 bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md ">
-                        <LogIn />Portal MyClinicSOL
+                        <LogIn />Acessar Portal
                     </Button>
                 </div>
             ) :  (<div className="flex items-center justify-center w-full">
                     <Button 
                         onClick={hgLogin}
                         className="ml-3 flex items-center gap-3 bg-blue-900 text-white hover:bg-blue-800 shadow-blue-200 hover:shadow-md">
-                        <LogIn />Portal MyClinicSOL
+                        <LogIn />Acessar Portal
                     </Button>
                 </div>
             )}

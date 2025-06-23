@@ -14,6 +14,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Banknote, CalendarCheck2, ChevronLeft, ChevronRight, BriefcaseBusiness, Menu, LogOut, UserRoundCog } from 'lucide-react';
 import Link from 'next/link';
+import { signOut, useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 
 import {
@@ -25,6 +27,7 @@ import {
 
 export function SidebarDashboard({ children }: { children: React.ReactNode }) {
 
+  const router = useRouter();
   const pathname = usePathname();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -144,9 +147,10 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
               </span>
 
               <SidebarLink
-                href="/"
+                href="#sair"
                 label="Sair"
                 pathname=""
+                isLogOut={true}
                 isCollapsed={isCollapsed}
                 icon={<LogOut className='w-6 h-6' />}
               />
@@ -223,10 +227,11 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
 
 
                 <SidebarLink
-                  href="/"
+                  href="#sair"
                   label="Sair"
                   pathname=""
                   isCollapsed={isCollapsed}
+                  isLogOut={true}
                   icon={<LogOut className='w-6 h-6' />}
                 />
               </nav>
@@ -243,31 +248,51 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
 
     </div>
   )
-}
+  
+  async function LogOutSystem(){
+    await signOut();
+    router.replace("/");
+  }
 
-
-interface SidebarLinkProps {
+  interface SidebarLinkProps {
   href: string;
   icon: React.ReactNode;
   label: string;
   pathname: string;
-  isCollapsed: boolean
+  isCollapsed: boolean;
+  isLogOut?: boolean | undefined;
 }
 
-function SidebarLink({ href, icon, isCollapsed, label, pathname }: SidebarLinkProps) {
-  return (
-    <Link
-      href={href}
-    >
-      <div
-        className={clsx("flex items-center gap-2 px-3 py-2 rounded-md transition-colors", {
-          "text-white bg-blue-500": pathname === href,
-          "text-gray-700 hover:bg-white hover:text-blue-800": pathname !== href,
-        })}
+  function SidebarLink({ href, icon, isCollapsed, label, pathname, isLogOut }: SidebarLinkProps) {
+    return (
+      <>
+        { isLogOut === undefined ? (
+      <Link
+        href={href}
       >
-        <span className='w-6 h-6'>{icon}</span>
-        {!isCollapsed && <span>{label}</span>}
-      </div>
-    </Link>
-  )
+        <div
+          className={clsx("flex items-center gap-2 px-3 py-2 rounded-md transition-colors", {
+            "text-white bg-blue-500": pathname === href,
+            "text-gray-700 hover:bg-white hover:text-blue-800": pathname !== href,
+          })}
+        >
+          <span className='w-6 h-6'>{icon}</span>
+          {!isCollapsed && <span>{label}</span>}
+        </div>
+      </Link>
+    ) : (
+        <Button
+          variant="ghost"
+          onClick={ async () => { await LogOutSystem() }}
+          className="m-0 w-full h-full rounded-md text-gray-700 hover:bg-white hover:text-blue-800"
+        >
+          <div className='flex items-center rounded-md w-full h-full p-0 m-0'>
+            <span className='w-7 h-7 pt-1 text-base'>{icon}</span>
+            {!isCollapsed && <span className="text-base">{label}</span>}
+          </div>
+        </Button>
+    )
+  }
+  </> )
+  }
 }
