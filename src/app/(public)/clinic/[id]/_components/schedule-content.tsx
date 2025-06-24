@@ -1,14 +1,16 @@
 "use client"
 
-import Image from "next/image";
-import imgTest from '../../../../../../public/prof1.jpg';
-import { MapPin } from "lucide-react";
-import { Prisma } from "@/generated/prisma";
-import { useAppointmentForm, AppointmentFormData } from './schedule-form';
-import { Button } from '@/components/ui/button';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import Image from "next/image"
+import imgTest from '../../../../../../public/prof1.jpg'
+import { MapPin } from "lucide-react"
+import { Prisma } from "@/generated/prisma"
+import { useAppointmentForm, AppointmentFormData } from './schedule-form'
+import { Button } from '@/components/ui/button'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Label } from '@/components/ui/label'
+import { Input } from '@/components/ui/input'
+import { formatPhone } from '@/app/utils/formatPhone'
+import { DateTimePicker } from "./date-picker"
 
 type UserWithServiceAndSubscription = Prisma.UserGetPayload<{
   include: {
@@ -57,32 +59,96 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
       </section>
 
 
-      {/* Formulário de agendamento */}
-      <Form {...form}>
-        <form
-          className="mx-2 space-y-6 bg-white p-6 border rounded-md shadow-sm"
-        >
+      <section className="max-w-2xl mx-auto w-full mt-6">
+        {/* Formulário de agendamento */}
+        <Form {...form}>
+          <form
+            className="mx-2 space-y-6 bg-white p-6 border rounded-md shadow-sm"
+          >
 
-          <FormField
-            control={form.control}
-            name="name"
-            render={({ field }) => (
-              <FormItem className="my-2">
-                <FormLabel className="font-semibold">Nome completo:</FormLabel>
-                <FormControl>
-                  <Input
-                    id="name"
-                    placeholder="Digite seu nome completo..."
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            <FormField
+              control={form.control}
+              name="name"
+              render={({ field }) => (
+                <FormItem className="my-2">
+                  <FormLabel className="font-semibold">Nome completo:</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="name"
+                      placeholder="Digite seu nome completo..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-        </form>
-      </Form>
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem className="my-2">
+                  <FormLabel className="font-semibold">Email:</FormLabel>
+                  <FormControl>
+                    <Input
+                      id="email"
+                      placeholder="Digite seu email..."
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem className="my-2">
+                  <FormLabel className="font-semibold">Telefone:</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      id="phone"
+                      placeholder="(XX) XXXXX-XXXX"
+                      onChange={(e) => {
+                        const formattedValue = formatPhone(e.target.value)
+                        field.onChange(formattedValue)
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem className="flex items-center gap-2 space-y-1">
+                  <FormLabel className="font-semibold">Data do agendamento:</FormLabel>
+                  <FormControl>
+                    <DateTimePicker
+                      initialDate={new Date()}
+                      className="w-full rounded border p-2"
+                      onChange={(date) => {
+                        if (date) {
+                          field.onChange(date)
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+          </form>
+        </Form>
+      </section>
 
     </div>
   )
