@@ -336,7 +336,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
                   type="submit"
                   className='w-full bg-emerald-600 hover:bg-emerald-500'
                 >
-                  Salvar alterações
+                  Salvar alteração
                 </Button>
 
               </div>
