@@ -3,7 +3,7 @@
 import { useState, useCallback, useEffect } from 'react'
 import Image from "next/image"
 import imgTest from '../../../../../../public/prof1.jpg'
-import { MapPin } from "lucide-react"
+import { CalendarArrowUp, MapPin } from "lucide-react"
 import { Prisma } from "@/generated/prisma"
 import { useAppointmentForm, AppointmentFormData } from './schedule-form'
 import { Button } from '@/components/ui/button'
@@ -13,6 +13,9 @@ import { Input } from '@/components/ui/input'
 import { formatPhone } from '@/app/utils/formatPhone'
 import { DateTimePicker } from "./date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { ScheduleTimeList } from './schedule-time-list'
+import { msgError, msgInfo, msgSuccess, msgWarning } from '@/components/custom-toast'
+import { createNewAppointment } from '../_act/create-appointment'
 
 type UserWithServiceAndSubscription = Prisma.UserGetPayload<{
   include: {
@@ -26,7 +29,7 @@ interface ScheduleContentProps {
   clinic: UserWithServiceAndSubscription
 }
 
-interface TimeSlot {
+export interface TimeSlot {
   time: string;
   available: boolean;
 }
@@ -53,8 +56,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
       try{
         const dtString = date.toISOString().split("T")[0];
         const urlFetch = `${process.env.NEXT_PUBLIC_URL}/api/schedule/get-appointments?userId=${clinic.id}&date=${dtString}`
-        console.log(urlFetch);
-        const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/schedule/get-appointments?userId=${clinic.id}&date=${dtString}`);
+        const response = await fetch(urlFetch);
 
         const json = await response.json();
         setLoadingSlots(false);
@@ -70,7 +72,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
   useEffect(()=>{
     if (selectedDate){
       fetchBlockedTimes(selectedDate).then((blocked) => {
-        console.log("Horários reservados: ",blocked)
+        // console.log("Horários reservados: ",blocked)
         setBlockedTimes(blocked);
 
         const times = clinic.times || [];
@@ -78,15 +80,47 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
           time: time,
           available: !blocked.includes(time)
         }))
-
+        
         setAvailableTimeSlots(finalSlot);
+
+        // Verificar se o slot estiver disponível, limpar a seleção
+        const stillAvailable = finalSlot.find(
+          (slot) => slot.time === selectedTime && slot.available
+        )
+        
+        if(!stillAvailable){
+          setSelectedTime("");
+        }
+
 
       })
     }
   }, [selectedDate, clinic.times, fetchBlockedTimes, selectedTime])
 
   async function handleRegisterAppointmnent(formData: AppointmentFormData) {
-    console.log(formData)
+    if(!selectedTime){
+      msgInfo("É necessário definir um horário para registro de agendamento.")
+      return;
+    }
+    const response = await createNewAppointment({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      date: formData.date,
+      clinicId: clinic.id,
+      serviceId: formData.serviceId,
+      time: selectedTime,
+    })
+
+    if(response.error){
+      msgError(response.error)
+      return;
+    }
+
+    msgSuccess("Consulta agendada com sucesso.");
+    form.reset();
+    setSelectedTime("");
+    
   }
 
   return (
@@ -199,6 +233,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                       onChange={(date) => {
                         if (date) {
                           field.onChange(date)
+                          setSelectedTime("")
                         }
                       }}
                     />
@@ -215,7 +250,10 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                 <FormItem className="">
                   <FormLabel className="font-semibold">Selecione o serviço:</FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange}>
+                    <Select onValueChange={(value) => {
+                      field.onChange(value)
+                      setSelectedTime("")
+                    }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione um serviço" />
                       </SelectTrigger>
@@ -232,6 +270,34 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                 </FormItem>
               )}
             />
+            
+            {selectedServiceId && (
+              <div>
+                <Label className='font-semibold'>Horários disponíveis:</Label>
+                <div className="bg-gray-100 p-4 rounded-lg">
+                  {loadingSlots ? (
+                    <p>Carregando horários...</p>
+                  ): availableTimeSlots.length === 0 ? (
+                    <p>Nenhum horário disponível.</p>
+                  ): (
+                    <ScheduleTimeList
+                      onSelectTime={(time) => setSelectedTime(time)}
+                      clinicTimes={clinic.times}
+                      blockedTimes={blockedTimes}
+                      availableTimeSlots={availableTimeSlots}
+                      selectedTime={selectedTime}
+                      selectedDate={selectedDate}
+                      requiredSlots={
+                        clinic.services.find(service => service.id === selectedServiceId) ? 
+                        Math.ceil(clinic.services.find(service => service.id === selectedServiceId)!.duration / 30)
+                        : 1
+                      }
+                    />
+                  )}
+                </div>
+              </div>
+            )}
+
 
             {clinic.status ? (
               <Button
@@ -239,6 +305,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                 className="w-full bg-emerald-500 hover:bg-emerald-400"
                 disabled={!watch("name") || !watch("email") || !watch("phone") || !watch("date")}
               >
+                <CalendarArrowUp className="w-5! h-5!" />
                 Realizar agendamento
               </Button>
             ) : (
