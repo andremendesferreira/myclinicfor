@@ -46,7 +46,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
           {!isCollapsed && (
               <span className="pb-2">
                   <span className="text-blue-950">MyClinic</span>
-                  <span className="text-emerald-500">FOR</span>
+                  <span className="text-emerald-500">SOL</span>
               </span>
           )}
                 <Button
@@ -181,12 +181,12 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
               </SheetTrigger>
 
               <h1 className='text-base md:text-lg font-semibold'>
-                <span className='font-semibold'>Menu </span><span className="text-blue-950 font-bold">MyClinic</span><span className="text-emerald-500 font-bold">FOR</span>
+                <span className='font-semibold'>Menu </span><span className="text-blue-950 font-bold">MyClinic</span><span className="text-emerald-500 font-bold">SOL</span>
               </h1>
             </div>
 
             <SheetContent side="right" className='sm:max-w-xs text-black p-4 bg-gradient-to-b from-white via-blue-100 to-indigo-200'>
-              <SheetTitle className="font-bold text-base"><span className="text-blue-950">MyClinic</span><span className="text-emerald-500">FOR</span>
+              <SheetTitle className="font-bold text-base"><span className="text-blue-950">MyClinic</span><span className="text-emerald-500">SOL</span>
                 <SheetDescription>
                    <span className="font-normal text-sm">Menu administrativo</span>
                 </SheetDescription>

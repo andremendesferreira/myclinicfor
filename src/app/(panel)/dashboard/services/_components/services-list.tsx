@@ -156,16 +156,14 @@ export function ServicesList({ services }: ServicesListProps) {
                                             }
                                         </Button>
                                         <Dialog open={isAuthorizationDialogOpen} onOpenChange={setIsAuthorizationDialogOpen}>
-                                            <DialogTrigger>
-                                                <div suppressHydrationWarning={true}>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="icon"
-                                                        className="ml-3 mr-1"
-                                                    >
-                                                        <Trash className="w-4 h-4 text-red-700" />
-                                                    </Button>
-                                                </div>
+                                            <DialogTrigger asChild>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="ml-3 mr-1"
+                                                >
+                                                    <Trash className="w-4 h-4 text-red-700" />
+                                                </Button>
                                             </DialogTrigger>
                                             <DialogContent>
                                                 <DialogHeader>
