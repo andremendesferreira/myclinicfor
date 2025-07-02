@@ -2,10 +2,10 @@ import getSession from "@/lib/getSession";
 import { redirect } from "next/navigation"
 import { getUserData } from "./profile/_dta/get_info_user";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { CalendarArrowUp } from "lucide-react";
 import { ButtonCopyLink } from './_components/button-copy-link';
-import { Reminders } from './_components/reminders';
+import { Reminders } from './_components/reminders/reminders';
+import { ButtonTooltipCustom } from './_components/button-tooltip';
 
 export default async function Dashboard(){
   const session = await getSession();
@@ -29,10 +29,14 @@ export default async function Dashboard(){
           href={`/clinic/${session.user?.id}`}
           target='_blank'
         >
-          <Button className='bg-emerald-600 hover:bg-emerald-500 flex-1 md:flex[0]'>
-            <CalendarArrowUp className='w-5! h-5!' />
-            <span>Novo agendamento</span>
-          </Button>
+          <ButtonTooltipCustom 
+            className='bg-emerald-600 hover:bg-emerald-500 flex-1 md:flex[0]'
+            icon={<CalendarArrowUp className="w-5! h-5!"/>}
+            textButtonInner="Novo agendamento"
+            tooltipMsg="Abrir página de agendamento em nova guia."
+            tooltipStyleBox="bg-emerald-600 text-white fill-emerald-600"
+            tooltipStyleArrow="bg-emerald-600"
+          />
         </Link>
         <ButtonCopyLink      
           url={urlLink}
