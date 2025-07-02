@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { CalendarArrowUp } from "lucide-react";
 import { ButtonCopyLink } from './_components/button-copy-link';
+import { Reminders } from './_components/reminders';
 
 export default async function Dashboard(){
   const session = await getSession();
@@ -38,8 +39,16 @@ export default async function Dashboard(){
           msgErr="Falha ao tentar copiar link de referência da clínica."
           msgInf="Link de referência copiado para área de transferência."
           styleBt="bg-blue-900 hover:bg-blue-700"
+          tooltipMsg="Copiar link da página de agendamento."
+          tooltipStyleBx="bg-blue-800 text-white fill-blue-800"
+          tooltipStyleAw="bg-blue-800"
         />
       </div>
+
+      <section className="grid grid-col-1 gap-4 lg:grid-cols-2 mt-4">
+        <div>AGENDA</div>
+        <Reminders userId={session.user?.id!} />
+      </section>
     </main>
   );
 }

@@ -80,7 +80,7 @@ export function Header() {
                         bg-emerald-800 text-white hover:bg-emerald-700 shadow-zinc-100 
                         hover:shadow-sm rounded-sm px-3 pb-1'
                         href="/dashboard"
-                    ><LogIn className="w-6 h-6 pt-1"/>Acessar Portal</Link>
+                    ><LogIn className="w-6 h-6 pt-1"/><span className="pt-1">Acessar Portal</span></Link>
                 </div>
             ): (!session && isOpen) ? (<div className="flex items-center justify-center w-full">
                     <Button 

@@ -32,7 +32,7 @@ export default function RootLayout({
         <SessionAuthProvider>
           <Toaster 
             richColors
-            position="top-right"
+            position="bottom-right"
             expand={true}
            />
           {children}

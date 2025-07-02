@@ -289,7 +289,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
         >
           <div className='flex items-center rounded-md w-full h-full p-0 m-0'>
             <span className='w-6 h-6 mr-2'><DoorOpen className="!w-6 !h-6" /></span>
-            {!isCollapsed && <span className="text-base">{label}</span>}
+            {!isCollapsed && <span className="text-base font-normal">{label}</span>}
           </div>
         </Button>
     )
