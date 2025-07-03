@@ -9,7 +9,11 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@aldabil/react-scheduler": "^3.1.2",
     "@auth/prisma-adapter": "^2.9.1",
+    "@bitnoi.se/react-scheduler": "^0.3.1",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
     "@hookform/resolvers": "^5.1.1",
     "@prisma/client": "^6.9.0",
     "@prisma/extension-accelerate": "^2.0.1",

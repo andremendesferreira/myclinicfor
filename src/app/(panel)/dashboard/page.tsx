@@ -6,6 +6,7 @@ import { CalendarArrowUp } from "lucide-react";
 import { ButtonCopyLink } from './_components/button-copy-link';
 import { Reminders } from './_components/reminders/reminders';
 import { ButtonTooltipCustom } from './_components/button-tooltip';
+import { Appointments } from './_components/appointments/appointments'
 
 export default async function Dashboard(){
   const session = await getSession();
@@ -49,8 +50,8 @@ export default async function Dashboard(){
         />
       </div>
 
-      <section className="grid grid-col-1 gap-4 lg:grid-cols-2 mt-4">
-        <div>AGENDA</div>
+      <section className="grid grid-col-1 gap-4 lx:grid-cols-2 mt-4">
+        <Appointments userId={session.user?.id!} />
         <Reminders userId={session.user?.id!} />
       </section>
     </main>
