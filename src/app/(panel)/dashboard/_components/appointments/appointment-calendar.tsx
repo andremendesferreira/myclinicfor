@@ -1,5 +1,5 @@
 "use client"
-import { Appointment } from '@/generated/prisma';
+import { Prisma } from '@/generated/prisma';
 import { Scheduler } from "@aldabil/react-scheduler";
 import { 
     Card,
@@ -14,8 +14,14 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { CalendarClock } from 'lucide-react';
 import { ptBR } from "date-fns/locale";
 
+type AppointmentWithService = Prisma.AppointmentGetPayload<{
+  include: {
+    service: true
+  }
+}>
+
 interface AppointmentsListProps {
-    appointments: Appointment[]
+    appointments: AppointmentWithService[]
 }
 
 const translations = {
@@ -146,7 +152,7 @@ const translations = {
 };
 
 
-export function AppointmentsCalendar({appointments}: AppointmentsListProps){
+export function AppointmentsCalendar({ appointments }: AppointmentsListProps){
 
     const [isLoading, setIsLoading] = useState(false);
 
@@ -158,7 +164,20 @@ export function AppointmentsCalendar({appointments}: AppointmentsListProps){
       setIsLoading(false);
     }, []);
 
-    console.log('Listar agendamentos: ', appointments);
+    function covertAppointment(date: Date, time: string, duration: number ){
+      const convertTime = date.toISOString().split("T")[0];
+      const [ year, month, day ] = convertTime.split("-").map(Number);
+      const [ hour, min ] = time.split(":").map(Number);
+      const hUsed = Math.floor(duration / 60);
+      const mUsed = Math.floor(duration % 60);
+      const addSelectedTime = new Date(year, month, day, hour, min, 0);
+      const addFinalTime = new Date(year, month, day, hour + hUsed , min + mUsed, 0);
+      return {
+        startDt: addSelectedTime,
+        finalDt: addFinalTime
+      }
+    }
+
     return(
         <div className="flex flex-col">
           <Card className="pt-3 gap-3">
@@ -180,12 +199,14 @@ export function AppointmentsCalendar({appointments}: AppointmentsListProps){
                       height={570}
                       locale={ptBR}
                       translations={translations}
-                      events={appointments.map((appointment) => ({
-                        event_id: appointment.id,
-                        title: appointment.name,
-                        start: new Date(appointment.appointmentDate),
-                        end: new Date(appointment.appointmentDate + appointment.time), // Adjust as needed for end time
-                      }))}
+                      events={
+                        appointments.map((appointment) => ({
+                          event_id: appointment.id,
+                          title: appointment.name,
+                          start: covertAppointment(appointment.appointmentDate, appointment.time,appointment.service.duration).startDt,
+                          end: covertAppointment(appointment.appointmentDate, appointment.time,appointment.service.duration).finalDt, 
+                        }))
+                      }
                     />
                   </div>
               </ScrollArea>
