@@ -250,7 +250,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                 <FormItem className="">
                   <FormLabel className="font-semibold">Selecione o serviço:</FormLabel>
                   <FormControl>
-                    <Select onValueChange={(value) => {
+                    <Select onValueChange={(value:any) => {
                       field.onChange(value)
                       setSelectedTime("")
                     }}>

@@ -50,7 +50,7 @@ export default async function Dashboard(){
         />
       </div>
 
-      <section className="grid grid-col-1 gap-4 lx:grid-cols-2 mt-4">
+      <section className="grid grid-col-1 gap-4 lg:grid-cols-2 mt-4">
         <Appointments userId={session.user?.id!} />
         <Reminders userId={session.user?.id!} />
       </section>

@@ -13,11 +13,11 @@ function currentDateSelected({ startDt, finalDt }: GetAppointmentDate)  {
   const day = new Date().getDate();
   if ( !startDt || startDt === '' ) 
     { 
-      startDt = new Date(year, month, day, 0, 0, 0, 0).toISOString()
+      startDt = new Date(Date.UTC(year, month, day, 0, 0, 0, 0)).toISOString()
     };
   if ( !finalDt || finalDt === '' ) 
     { 
-      finalDt = new Date(year, month+1, day, 0, 0, 0, 0).toISOString()
+      finalDt = new Date(Date.UTC(year, month+1, day, 0, 0, 0, 0)).toISOString()
     };
   
   const data = { startDt: startDt , finalDt: finalDt };

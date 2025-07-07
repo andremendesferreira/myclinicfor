@@ -58,8 +58,13 @@ export function ServicesList({ services }: ServicesListProps) {
     }
 
     // Deletar serviço
-    function handleDeleteService(serviceId: string) {
-        deleteService({ serviceId });
+   async function handleDeleteService(serviceId: string) {
+       const response = await deleteService({ serviceId });
+        if (response.error) {
+            msgError(response.error);
+        } else {
+            msgSuccess(response.data || 'Serviço excluído com sucesso!');
+        }
     }
 
     // Editar serviço
@@ -169,30 +174,29 @@ export function ServicesList({ services }: ServicesListProps) {
                                                 <DialogHeader>
                                                     <DialogTitle>Exclusão de serviço</DialogTitle>
                                                     <DialogDescription>
-                                                        Ao remover um serviço, ele será excluído da base de dados, assim como todas as suas referências e vínculos existentes.
+                                                        <strong>Atenção:</strong> Esta ação é irreversível e removerá permanentemente o serviço e todos os dados relacionados (agendamentos, histórico, etc.).
+                                                        <br/><br/>
+                                                        <strong>Alternativa:</strong> Se você deseja apenas impedir novos agendamentos, recomendamos inativar o serviço. Dessa forma, ele não ficará disponível para seleção, mas o histórico será preservado.
                                                     </DialogDescription>
                                                 </DialogHeader>
                                                 <DialogFooter className="flex flex-row items-center justify-around space-x-4 py-4">
-                                                        <DialogClose>
-                                                            <Button
-                                                                variant="outline"
-                                                                onClick={() => { setIsAuthorizationDialogOpen(false) }}
-                                                                
-                                                            >
-                                                                <Ban className="w-4 h4" />
-                                                                <span>Cancelar</span>
-                                                            </Button>
-                                                        </DialogClose>
-                                                        <Button
-                                                            onClick={() => {
-                                                                handleDeleteService(service.id);
-                                                                setIsAuthorizationDialogOpen(false);
-                                                            }}
-                                                            className="bg-red-700 hover:bg-red-600"
-                                                        >
-                                                            <Trash className="w-4 h4" />
-                                                            <span>Confirmar</span>
-                                                        </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        onClick={() => { setIsAuthorizationDialogOpen(false) }}
+                                                    >
+                                                        <Ban className="w-4 h-4" />
+                                                        <span>Cancelar</span>
+                                                    </Button>
+                                                    <Button
+                                                        onClick={() => {
+                                                            handleDeleteService(service.id);
+                                                            setIsAuthorizationDialogOpen(false);
+                                                        }}
+                                                        className="bg-red-700 hover:bg-red-600"
+                                                    >
+                                                        <Trash className="w-4 h-4" />
+                                                        <span>Confirmar</span>
+                                                    </Button>
                                                 </DialogFooter>
                                             </DialogContent>
                                         </Dialog>

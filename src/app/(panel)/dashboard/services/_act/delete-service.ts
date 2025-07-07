@@ -82,6 +82,14 @@ export async function deleteService(formData: FormDeleteSchema) {
     }
     
     try{
+
+        await prisma.appointment.deleteMany({
+            where: {
+                userId: session?.user?.id,
+                serviceId: formData.serviceId  
+            }
+        })
+
         await prisma.service.delete({
             where: {
                 id: formData.serviceId,
@@ -98,7 +106,7 @@ export async function deleteService(formData: FormDeleteSchema) {
     }catch(err){
         console.log(err);
         return {
-            error: "Erro ao tentar remover o serviço."
+            error: "Serviço possuí agendamento realizado, não sendo possível removê-lo."
         }
     }
 }

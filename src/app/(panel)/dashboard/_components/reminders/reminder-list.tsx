@@ -1,12 +1,11 @@
 "use client"
-
+import { useState } from 'react'
 import { Button } from "@/components/ui/button";
 import { 
     Card,
     CardContent,
     CardTitle,
     CardHeader
-
  } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Reminder } from "@/generated/prisma";
@@ -14,6 +13,15 @@ import { MessageCircleWarning, Plus, Trash } from "lucide-react";
 import { deleteRemider } from '../../_act/delete-reminder'
 import { msgError, msgSuccess, msgInfo, msgWarning } from '@/components/custom-toast'
 import { useRouter } from "next/navigation";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogDescription
+} from '@/components/ui/dialog'
+import { ReminderContent } from './reminder-content'
 
 interface ReminderListProps {
     reminder: Reminder[]
@@ -23,6 +31,8 @@ export function ReminderList({reminder}: ReminderListProps){
     //console.log("Lembretes encontrados: ", reminder)
     
     const router = useRouter();
+
+     const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     async function handleDeleteReminder(id:string) {
         const response = await deleteRemider({reminderId:id});
@@ -44,13 +54,22 @@ export function ReminderList({reminder}: ReminderListProps){
                         <span className="pt-6">Lembretes</span>
                         <MessageCircleWarning className="w-6 h-6 text-amber-500" />
                     </CardTitle>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="p-3 mt-5"
-                    >
-                        <Plus className="w-4! h-4!"/>
-                    </Button>
+                    <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button variant="ghost" className="w-9 p-0">
+                                <Plus className="w-5 h-5" />
+                            </Button>
+                        </DialogTrigger>
+                        <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>Novo Lembrete</DialogTitle>
+                            <DialogDescription>Registre um novo lembrete para sua lista.</DialogDescription>
+                        </DialogHeader>
+                        <ReminderContent
+                            closeDialog={() => setIsDialogOpen(false)}
+                        />
+                        </DialogContent>
+                    </Dialog>
                 </CardHeader>
                 <CardContent className="m-0">
                     {reminder.length === 0 && (
@@ -65,8 +84,8 @@ export function ReminderList({reminder}: ReminderListProps){
                             >
                                 <p className="text-sm md:text-base">{item.description}</p>
                                 <Button
-                                    className="w-8 h-8 p-2 rounded-full bg-red-600 shadow-red-950 shadow-sm hover:bg-red-500 hover:shadown-none!"
-                                    size="sm"
+                                    className="w-6 h-6 p-2 rounded-full bg-red-600 shadow-red-950 shadow-sm hover:bg-red-500 hover:shadown-none!"
+                                    size="icon"
                                     onClick={() => handleDeleteReminder(item.id)}
                                 >
                                     <Trash className="p-0! m-0! w-4! h-4! text-white"/>

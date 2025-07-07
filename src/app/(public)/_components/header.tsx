@@ -12,7 +12,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { LogIn, Menu } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { hgRegister } from "../_actions/login"; 
+import { hgRegister } from "../_act/login"; 
 
 export function Header() {
 
