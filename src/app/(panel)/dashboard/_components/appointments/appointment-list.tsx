@@ -22,7 +22,6 @@ import {
 } from '@/components/ui/dialog'
 import { extractFormatPhone, formatPhone } from '@/app/utils/formatPhone'
 import { DialogAppointment } from './dialog-appointment'
-import { ButtonPickerAppointment } from './button-date'
 import Link from 'next/link'
 import { msgError, msgSuccess } from '@/components/custom-toast'
 
@@ -43,7 +42,6 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [detailAppointment, setDetailAppointment] = useState<AppointmentWithService | null>(null)
-
 
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["get-appointments", date],
@@ -100,7 +98,6 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
     }
   }
 
-
   async function handleCancelAppointment(appointmentId: string) {
     const response = await cancelAppointment({ appointmentId: appointmentId })
 
@@ -112,85 +109,140 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
     queryClient.invalidateQueries({ queryKey: ["get-appointments"] })
     await refetch()
     msgSuccess(response.data || 'Agendamento cancelado com sucesso.');
-
   }
 
+  // Função para verificar se deve mostrar os detalhes do agendamento
+  function shouldShowAppointmentDetails(slot: string, occupant: AppointmentWithService): boolean {
+    // Encontra o índice do slot atual
+    const currentIndex = times.indexOf(slot);
+    
+    // Se for o primeiro slot, sempre mostra
+    if (currentIndex === 0) return true;
+    
+    // Verifica se o slot anterior tem o mesmo agendamento
+    const previousSlot = times[currentIndex - 1];
+    const previousOccupant = occupantMap[previousSlot];
+    
+    // Se o slot anterior não tem o mesmo agendamento, mostra os detalhes
+    return !previousOccupant || previousOccupant.id !== occupant.id;
+  }
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-          <Card className="pt-3 gap-3">
-              <CardHeader className="flex flex-row items-center justify-between pl-6 pr-6 pb-0! mb-0!">
-                  <CardTitle className="flex flex-row items-center justify-normal text-lg md:text-xl font-semibold">
-                      <span className="pt-6">Agendamentos</span>
-                      <CalendarClock className="w-6 h-6 text-emerald-600 ml-2" />
-                  </CardTitle>
-              </CardHeader>
-              <CardContent className="m-0">  
+      <Card className="pt-3 gap-3">
+        <CardHeader className="flex flex-row items-center justify-between pl-6 pr-6 pb-0! mb-0!">
+          <CardTitle className="flex flex-row items-center justify-normal text-lg md:text-xl font-semibold">
+            <span className="pt-6">Agendamentos</span>
+            <CalendarClock className="w-6 h-6 text-emerald-600 ml-2" />
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="m-0">  
           <ScrollArea className="h-[404px] lg:h-[504px] xl:h-[664px] lg:max-h-[calc(100vh-15rem)] pr-2 w-full flex-1">
             {isLoading ? (
               <p>Carregando agenda...</p>
             ) : (
               <>
-                {times.map((slot) => {
-                  const occupant = occupantMap[slot];
-                  if (occupant) {
-                    return (
-                      <div
-                        key={slot}
-                        className='flex items-center py-2 border-t last:border-b'
-                      >
-                        <div className='w-16 text-sm font-semibold'>{slot}</div>
+                {(() => {
+                  // Contador para cada agendamento
+                  const slotCounters: Record<string, number> = {};
+                  
+                  return times.map((slot) => {
+                    const occupant = occupantMap[slot];
+                    
+                    if (occupant) {
+                      // Inicializa o contador para este agendamento se ainda não existir
+                      if (!slotCounters[occupant.id]) {
+                        slotCounters[occupant.id] = 0;
+                      }
+                      
+                      // Incrementa o contador para este agendamento
+                      slotCounters[occupant.id]++;
+                      
+                      // Verifica se deve mostrar os detalhes do agendamento
+                      const showDetails = shouldShowAppointmentDetails(slot, occupant);
+                      const totalSlotsUsed = Math.ceil(occupant.service.duration / 30);
+                      const currentSlotCount = slotCounters[occupant.id];
+                      
+                      console.log(`Agendamento ${occupant.id}: slot ${currentSlotCount} de ${totalSlotsUsed}`);
+                      
+                      if (showDetails) {
+                        return (
+                          <div
+                            key={slot}
+                            className='flex items-center py-2 border-t last:border-b'
+                          >
+                            <div className='w-16 text-sm font-semibold'>{slot}</div>
+                            <div className='flex-1 text-sm'>
+                              <div className='font-semibold'>{occupant.name}</div>
+                              <div className='text-sm text-gray-500'>
+                                <Link
+                                  href={`https://wa.me/${extractFormatPhone(occupant.phone, true)}?text=Olá%20${occupant.name.toString().split(' ')[0]}!%20Por%20favor,%20confirme%20sua%20presença%20na%20consulta%20agendada%20para%20${occupant.appointmentDate.toString().split('T')[0].split('-').reverse().join('/')}%20às%20${occupant.time}.%20Responda%20esta%20mensagem%20para%20confirmar.`}
+                                  target="_blank"
+                                  rel="Abrir WhatsApp"
+                                >
+                                  {`💬${formatPhone(occupant.phone)}`}
+                                </Link>
+                              </div>
+                            </div>
+                            <div className='ml-auto'>
+                              <div className='flex'>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={() => setDetailAppointment(occupant)}
+                                  >
+                                    <Eye className='w-4 h-4' />
+                                  </Button>
+                                </DialogTrigger>
 
-                        <div className='flex-1 text-sm'>
-                          <div className='font-semibold'>{occupant.name}</div>
-                          <div className='text-sm text-gray-500'>
-                            <Link
-                              href={`https://wa.me/${extractFormatPhone(occupant.phone, true)}?text=Olá%20${occupant.name.toString().split(' ')[0]}!%20Por%20favor,%20confirme%20sua%20presença%20na%20consulta%20agendada%20para%20${occupant.appointmentDate.toString().split('T')[0].split('-').reverse().join('/')}%20às%20${occupant.time}.%20Responda%20esta%20mensagem%20para%20confirmar.`}
-                              target="_blank"
-                              rel="Abrir WhatsApp"
-                            >
-                              {`💬${formatPhone(occupant.phone)}`}
-                            </Link>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => handleCancelAppointment(occupant.id)}
+                                >
+                                  <X className='w-4 h-4' />
+                                </Button>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      } else {
+                        // Slot ocupado mas não mostra detalhes (continuação do agendamento anterior)
+                        return (
+                          <div
+                            key={slot}
+                            className='flex items-center py-2'
+                          >
+                            <div className='w-16 text-sm font-semibold'>{slot}</div>
+                            {currentSlotCount === totalSlotsUsed ? (
+                              <div className='font-medium text-sm text-gray-600'>
+                                {`Duração de ${Math.floor(occupant.service.duration/60).toString().padStart(2, '0')}h${(occupant.service.duration%60).toString().padStart(2, '0')}min.`}
+                              </div>
+                            ) : (
+                              <div className='flex-1 text-sm text-gray-400'>
+                                {/* Slot ocupado - continuação */}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      }
+                    } else {
+                      // Slot disponível
+                      return (
+                        <div
+                          key={slot}
+                          className='flex items-center py-2 border-t last:border-b'
+                        >
+                          <div className='w-16 text-sm font-semibold'>{slot}</div>
+                          <div className='flex-1 text-sm'>
+                            Disponível
                           </div>
                         </div>
-
-                        <div className='ml-auto'>
-                          <div className='flex'>
-                            <DialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                onClick={() => setDetailAppointment(occupant)}
-                              >
-                                <Eye className='w-4 h-4' />
-                              </Button>
-                            </DialogTrigger>
-
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleCancelAppointment(occupant.id)}
-                            >
-                              <X className='w-4 h-4' />
-                            </Button>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <div
-                      key={slot}
-                      className='flex items-center py-2 border-t last:border-b'
-                    >
-                      <div className='w-16 text-sm font-semibold'>{slot}</div>
-                      <div className='flex-1 text-sm'>
-                        Disponível
-                      </div>
-                    </div>
-                  );
-                })}
+                      );
+                    }
+                  });
+                })()}
               </>
             )}
           </ScrollArea>
