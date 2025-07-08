@@ -34,7 +34,7 @@ export async function updateProfile(formData: FormSchema){
         }
     }
 
-    console.log("Passou: ", formData)
+    // console.log("Passou: ", formData)
 
     try{
         await prisma.user.update({

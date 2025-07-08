@@ -89,16 +89,9 @@ export function AppointmentsCalendar({ appointments }: AppointmentsListProps){
         };
     });
 
-            // color: "#059669",
-            // phone: appointment.phone,
-            // email: appointment.email,
-            // whatsappLink: `https://wa.me/${appointment.phone}?text=Por%20gentileza%20,%20confirme%20sua%20consulta%20agendada%20às%20${formattedTime}`,
-            // subtitle: `📞 ${appointment.phone || 'Não informado'} | 📧 ${appointment.email || 'Não informado'} | 💬 WhatsApp`
-
-
     // Combinar todos os eventos
     const allEvents = [...events];
-    console.log(allEvents)
+    // console.log(allEvents)
 
     return(
         <div className="flex flex-col">

@@ -18,7 +18,7 @@ export function DateTimePicker({ initialDate, className, minDate, onChange }: Da
 
   function handleChange(date: Date | null) {
     if (date) {
-      console.log('DatePicker: ', date);
+      // console.log('DatePicker: ', date);
       setStartDate(date);
       onChange(date)
     }

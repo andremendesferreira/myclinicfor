@@ -57,7 +57,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
     const fetchBlockedTimes = useCallback( async (date: Date): Promise<string[]> => {
       setLoadingSlots(true);
       try{
-        console.log(date.toISOString().split("T")[0])
+        // console.log(date.toISOString().split("T")[0])
         const dtString = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes())).toISOString().split("T")[0];
         const urlFetch = `${process.env.NEXT_PUBLIC_URL}/api/schedule/get-appointments?userId=${clinic.id}&date=${dtString}`
         const response = await fetch(urlFetch);
@@ -74,7 +74,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
   }, [clinic.id])
 
   useEffect(()=>{
-    console.log('Dia selecionado: ', selectedDate)
+    // console.log('Dia selecionado: ', selectedDate)
     if (selectedDate){
       fetchBlockedTimes(
         new Date(
@@ -87,7 +87,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
           )
         )
       ).then((blocked) => {
-        console.log("Horários reservados: ", blocked)
+        // console.log("Horários reservados: ", blocked)
         setBlockedTimes(blocked);
 
         const times = clinic.times || [];
@@ -272,7 +272,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                       initialDate={new Date()}
                       className="pl-3 w-full rounded-lg border m-0! text-sm"
                       onChange={(date) => {
-                        console.log('VerDate: ', date)
+                        // console.log('VerDate: ', date)
                         if (date) {
                           field.onChange(date)
                           setSelectedTime("")

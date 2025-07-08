@@ -38,6 +38,8 @@ export function ScheduleTimeList({
           blockedTimes
         )
 
+        // console.log('verify_slot: ',slot.time)
+
         const slotIsPast = dateIsToday && isSlotInThePast(slot.time);
 
         const slotEnabled = slot.available && sequenceOk && !slotIsPast;

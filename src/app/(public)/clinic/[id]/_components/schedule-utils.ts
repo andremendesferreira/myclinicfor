@@ -15,15 +15,18 @@ export function isToday(date: Date) {
 export function isSlotInThePast(slotTime: string) {
   const [slotHour, slotMinute] = slotTime.split(":").map(Number)
   const now = new Date()
-  const nowWithOutTimeZone = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDay(), now.getHours(), now.getMinutes()))
+  //const nowWithOutTimeZone = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDay(), now.getHours(), now.getMinutes()))
+  const nowWithOutTimeZone = new Date(now.getFullYear(), now.getMonth(), now.getDay(), now.getHours(), now.getMinutes())
   const currentHour = nowWithOutTimeZone.getHours();
   const currentMinute = nowWithOutTimeZone.getMinutes();
 
+  // console.log('VerificarSlots: ', currentHour, ' | ', slotHour, ' | ', currentMinute, ' | ', slotMinute);
+
   if (slotHour < currentHour) {
-    console.log('slothour menor que hora atual', slotHour, currentHour)
+    // console.log('slothour menor que hora atual', slotHour, currentHour)
     return true; // true quer dize que a hora já passou
   } else if (slotHour === currentHour && slotMinute <= currentMinute) {
-    console.log('slothour igual que hora atual e slotminute menor que minuto atual.', slotHour, currentHour, slotMinute, currentMinute)
+    // console.log('slothour igual que hora atual e slotminute menor que minuto atual.', slotHour, currentHour, slotMinute, currentMinute)
     return true;
   }
 

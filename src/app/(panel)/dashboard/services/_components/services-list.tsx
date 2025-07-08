@@ -67,11 +67,6 @@ export function ServicesList({ services }: ServicesListProps) {
         }
     }
 
-    // Editar serviço
-    function handleUpdateService(service: Service) {
-        console.log("Valores do Serviço: ", service);
-    }
-
     // Selecionar serviço
     function handleSelectService(service: Service) {
         setIsEditService(service);
@@ -174,6 +169,7 @@ export function ServicesList({ services }: ServicesListProps) {
                                                 <DialogHeader>
                                                     <DialogTitle>Exclusão de serviço</DialogTitle>
                                                     <DialogDescription>
+                                                        <br/>
                                                         <strong>Atenção:</strong> Esta ação é irreversível e removerá permanentemente o serviço e todos os dados relacionados (agendamentos, histórico, etc.).
                                                         <br/><br/>
                                                         <strong>Alternativa:</strong> Se você deseja apenas impedir novos agendamentos, recomendamos inativar o serviço. Dessa forma, ele não ficará disponível para seleção, mas o histórico será preservado.

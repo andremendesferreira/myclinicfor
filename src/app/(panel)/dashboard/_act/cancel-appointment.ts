@@ -45,7 +45,7 @@ export async function cancelAppointment(formData: FormSchema) {
     }
 
   } catch (err) {
-    // console.log(err)
+    console.log(err)
     return {
       error: "Ocorreu um erro ao deletar este agendamento."
     }

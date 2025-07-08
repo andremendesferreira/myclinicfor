@@ -14,7 +14,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { Prisma } from '@/generated/prisma'
 import { Button } from '@/components/ui/button'
-import { X, Eye } from 'lucide-react'
+import { X, Eye, CalendarClock } from 'lucide-react'
 import { cancelAppointment } from '../../_act/cancel-appointment'
 import {
   Dialog,
@@ -118,16 +118,15 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <Card>
-        <CardHeader className='flex flex-row items-center justify-between space-y-0 pb-2'>
-          <CardTitle className='text-xl md:text-2xl font-bold'>
-            Agendamentos
-          </CardTitle>
-          <ButtonPickerAppointment />
-        </CardHeader>
-
-        <CardContent>
-          <ScrollArea>
+          <Card className="pt-3 gap-3">
+              <CardHeader className="flex flex-row items-center justify-between pl-6 pr-6 pb-0! mb-0!">
+                  <CardTitle className="flex flex-row items-center justify-normal text-lg md:text-xl font-semibold">
+                      <span className="pt-6">Agendamentos</span>
+                      <CalendarClock className="w-6 h-6 text-emerald-600 ml-2" />
+                  </CardTitle>
+              </CardHeader>
+              <CardContent className="m-0">  
+          <ScrollArea className="h-[404px] lg:h-[504px] xl:h-[664px] lg:max-h-[calc(100vh-15rem)] pr-2 w-full flex-1">
             {isLoading ? (
               <p>Carregando agenda...</p>
             ) : (
