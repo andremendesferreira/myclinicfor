@@ -7,7 +7,7 @@ import { CalendarArrowUp, MapPin } from "lucide-react"
 import { Prisma } from "@/generated/prisma"
 import { useAppointmentForm, AppointmentFormData } from './schedule-form'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { formatPhone } from '@/app/utils/formatPhone'
@@ -16,6 +16,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ScheduleTimeList } from './schedule-time-list'
 import { msgError, msgInfo, msgSuccess, msgWarning } from '@/components/custom-toast'
 import { createNewAppointment } from '../_act/create-appointment'
+import { useRouter } from 'next/navigation'
+
 
 type UserWithServiceAndSubscription = Prisma.UserGetPayload<{
   include: {
@@ -36,6 +38,7 @@ export interface TimeSlot {
 
 export function ScheduleContent({ clinic }: ScheduleContentProps) {
 
+  const router = useRouter();
   const form = useAppointmentForm();
   const { watch } = form;
 
@@ -54,7 +57,8 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
     const fetchBlockedTimes = useCallback( async (date: Date): Promise<string[]> => {
       setLoadingSlots(true);
       try{
-        const dtString = date.toISOString().split("T")[0];
+        console.log(date.toISOString().split("T")[0])
+        const dtString = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes())).toISOString().split("T")[0];
         const urlFetch = `${process.env.NEXT_PUBLIC_URL}/api/schedule/get-appointments?userId=${clinic.id}&date=${dtString}`
         const response = await fetch(urlFetch);
 
@@ -70,9 +74,20 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
   }, [clinic.id])
 
   useEffect(()=>{
+    console.log('Dia selecionado: ', selectedDate)
     if (selectedDate){
-      fetchBlockedTimes(selectedDate).then((blocked) => {
-        // console.log("Horários reservados: ",blocked)
+      fetchBlockedTimes(
+        new Date(
+          Date.UTC(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate(),
+            selectedDate.getHours(),
+            selectedDate.getMinutes()
+          )
+        )
+      ).then((blocked) => {
+        console.log("Horários reservados: ", blocked)
         setBlockedTimes(blocked);
 
         const times = clinic.times || [];
@@ -91,8 +106,6 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
         if(!stillAvailable){
           setSelectedTime("");
         }
-
-
       })
     }
   }, [selectedDate, clinic.times, fetchBlockedTimes, selectedTime])
@@ -120,12 +133,14 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
     msgSuccess("Consulta agendada com sucesso.");
     form.reset();
     setSelectedTime("");
+
+    router.refresh();
     
   }
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="h-32 bg-emerald-500" />
+      <div className="h-32 bg-gradient-to-b from-white via-blue-100 to-indigo-200 " />
 
       <section className="contianer mx-auto px-4 -mt-16">
         <div className="max-w-2xl mx-auto">
@@ -154,12 +169,12 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
       </section>
 
 
-      <section className="max-w-2xl mx-auto w-full mt-6">
+      <section className="max-w-2xl mx-auto w-full mt-6 flex-1">
         {/* Formulário de agendamento */}
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleRegisterAppointmnent)}
-            className="mx-2 space-y-6 bg-white p-6 border rounded-md shadow-sm"
+            className="mx-2 space-y-6 bg-white p-6 border rounded-md shadow-lg"
           >
 
             <FormField
@@ -219,36 +234,12 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                 </FormItem>
               )}
             />
-
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem className="flex items-center gap-2 space-y-1">
-                  <FormLabel className="font-semibold">Data do agendamento:</FormLabel>
-                  <FormControl>
-                    <DateTimePicker
-                      initialDate={new Date()}
-                      className="w-full rounded border p-2"
-                      onChange={(date) => {
-                        if (date) {
-                          field.onChange(date)
-                          setSelectedTime("")
-                        }
-                      }}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
             <FormField
               control={form.control}
               name="serviceId"
               render={({ field }) => (
-                <FormItem className="">
-                  <FormLabel className="font-semibold">Selecione o serviço:</FormLabel>
+                <FormItem className="my-2">
+                  <FormLabel className="font-semibold">Defina o serviço:</FormLabel>
                   <FormControl>
                     <Select onValueChange={(value:any) => {
                       field.onChange(value)
@@ -270,10 +261,33 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                 </FormItem>
               )}
             />
-            
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem className="mb-3! gap-0">
+                  <FormLabel className="font-semibold mb-2">Data do agendamento:</FormLabel>
+                  <FormControl className="pt-2">
+                    <DateTimePicker
+                      initialDate={new Date()}
+                      className="pl-3 w-full rounded-lg border m-0! text-sm"
+                      onChange={(date) => {
+                        console.log('VerDate: ', date)
+                        if (date) {
+                          field.onChange(date)
+                          setSelectedTime("")
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             {selectedServiceId && (
-              <div>
-                <Label className='font-semibold'>Horários disponíveis:</Label>
+              <div className="pt-1">
+                <Label className='font-semibold pb-2'>Horários disponíveis:</Label>
                 <div className="bg-gray-100 p-4 rounded-lg">
                   {loadingSlots ? (
                     <p>Carregando horários...</p>

@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
 
     const blockedTimes = Array.from(blockedSlots);
 
-    console.log("Horários bloqueados: ", blockedTimes);
+    console.log("Horários bloqueados_p1: ", blockedTimes);
 
     return NextResponse.json(blockedTimes);
 

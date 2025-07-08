@@ -35,6 +35,18 @@ export async function createNewAppointment(formData: FormSchema) {
 
     const appointmentDate = new Date(Date.UTC(year, month, day, 0, 0, 0, 0))
 
+    const Data =  {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        time: formData.time,
+        appointmentDate: appointmentDate,
+        serviceId: formData.serviceId,
+        userId: formData.clinicId
+      }
+
+    console.log(Data);
+    
     const newAppointment = await prisma.appointment.create({
       data: {
         name: formData.name,

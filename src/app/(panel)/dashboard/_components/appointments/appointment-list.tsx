@@ -16,15 +16,15 @@ import { Prisma } from '@/generated/prisma'
 import { Button } from '@/components/ui/button'
 import { X, Eye } from 'lucide-react'
 import { cancelAppointment } from '../../_act/cancel-appointment'
-import { toast } from 'sonner'
 import {
   Dialog,
   DialogTrigger
 } from '@/components/ui/dialog'
-import { extractFormatPhone } from '@/app/utils/formatPhone'
+import { extractFormatPhone, formatPhone } from '@/app/utils/formatPhone'
 import { DialogAppointment } from './dialog-appointment'
 import { ButtonPickerAppointment } from './button-date'
 import Link from 'next/link'
+import { msgError, msgSuccess } from '@/components/custom-toast'
 
 export type AppointmentWithService = Prisma.AppointmentGetPayload<{
   include: {
@@ -95,12 +95,8 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
           if (slotIndex < times.length) {
             occupantMap[times[slotIndex]] = appointment;
           }
-
         }
-
       }
-
-
     }
   }
 
@@ -109,13 +105,13 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
     const response = await cancelAppointment({ appointmentId: appointmentId })
 
     if (response.error) {
-      toast.error(response.error);
+      msgError(response.error);
       return;
     }
 
     queryClient.invalidateQueries({ queryKey: ["get-appointments"] })
     await refetch()
-    toast.success(response.data);
+    msgSuccess(response.data || 'Agendamento cancelado com sucesso.');
 
   }
 
@@ -137,9 +133,7 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
             ) : (
               <>
                 {times.map((slot) => {
-                  // ocupantMap["15:00"]
                   const occupant = occupantMap[slot];
-
                   if (occupant) {
                     return (
                       <div
@@ -152,11 +146,11 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
                           <div className='font-semibold'>{occupant.name}</div>
                           <div className='text-sm text-gray-500'>
                             <Link
-                              href={`https://wa.me/${extractFormatPhone(occupant.phone)}?text=Por%20gentileza,%20${occupant.name},%20confirme%20sua%20consulta%20agendada%20para%20${occupant.appointmentDate.toString().split('T')[0]}%20às%20${occupant.time}.`}
+                              href={`https://wa.me/${extractFormatPhone(occupant.phone, true)}?text=Olá%20${occupant.name.toString().split(' ')[0]}!%20Por%20favor,%20confirme%20sua%20presença%20na%20consulta%20agendada%20para%20${occupant.appointmentDate.toString().split('T')[0].split('-').reverse().join('/')}%20às%20${occupant.time}.%20Responda%20esta%20mensagem%20para%20confirmar.`}
                               target="_blank"
                               rel="Abrir WhatsApp"
                             >
-                              {`💬${occupant.phone}`}
+                              {`💬${formatPhone(occupant.phone)}`}
                             </Link>
                           </div>
                         </div>

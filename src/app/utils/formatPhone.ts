@@ -18,7 +18,13 @@ export function formatPhone(value: string){
 /**
  * Remove todo a mascara do telefone para inserir na base de dados
  */
-export function extractFormatPhone(value: string){
-    const phoneValue = value.replace(/[\(\)\s-]/g,"");
+export function extractFormatPhone(value: string, withOutDDD?: boolean): string {
+    let phoneValue = value.replace(/[\(\)\s-]/g, "");
+    
+    if (withOutDDD && (phoneValue.length > 9 && phoneValue.length < 12 )) {
+        // Remove os 2 primeiros dígitos (DDD) se withOutDDD for true
+        phoneValue = phoneValue.substring(2);
+    }
+    
     return phoneValue;
 }

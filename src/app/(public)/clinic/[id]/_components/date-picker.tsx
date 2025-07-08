@@ -18,7 +18,7 @@ export function DateTimePicker({ initialDate, className, minDate, onChange }: Da
 
   function handleChange(date: Date | null) {
     if (date) {
-      // console.log(date);
+      console.log('DatePicker: ', date);
       setStartDate(date);
       onChange(date)
     }
@@ -27,12 +27,16 @@ export function DateTimePicker({ initialDate, className, minDate, onChange }: Da
 
   return (
     <DatePicker
+      showIcon
+      toggleCalendarOnIconClick
       className={className}
       selected={startDate}
       locale="pt-BR"
       minDate={minDate ?? new Date()}
       onChange={handleChange}
       dateFormat="dd/MM/yyyy"
-    />
+    >
+      <div className="text-red-400 text-center">Não esqueça de selecionar a data!</div>
+    </DatePicker>
   )
 }
