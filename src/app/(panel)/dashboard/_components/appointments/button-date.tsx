@@ -4,7 +4,13 @@ import { ChangeEvent, useState } from 'react'
 import { format } from 'date-fns'
 import { useRouter } from 'next/navigation'
 
-export function ButtonPickerAppointment() {
+interface DatePickerPros {
+  className?: string,
+  title?: string | 'Selecione uma data',
+  placeholder?: string | 'Selecione uma data'
+}
+
+export function ButtonPickerAppointment({className, title, placeholder}:DatePickerPros) {
   const router = useRouter();
 
   const [selectedDate, setSelectedDate] = useState(format(new Date(), "yyyy-MM-dd"))
@@ -23,11 +29,11 @@ export function ButtonPickerAppointment() {
     <input
       type="date"
       id="start"
-      className="border-2 px-2 py-1 rounded-md text-sm md:text-base"
+      className={`${className} border-2 px-2 py-1 rounded-md text-sm md:text-base`}
       value={selectedDate}
       onChange={handleChangeDate}
-      title="Select appointment date"
-      placeholder="Select date"
+      title={title}
+      placeholder={placeholder}
     />
   )
 }

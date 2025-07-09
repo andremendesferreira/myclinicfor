@@ -51,8 +51,8 @@ export function ReminderList({reminder}: ReminderListProps){
             <Card className="pt-3 gap-3">
                 <CardHeader className="flex flex-row items-center justify-between pl-6 pr-6 pb-0! mb-0!">
                     <CardTitle className="flex flex-row items-center justify-normal text-lg md:text-xl font-semibold">
-                        <span className="pt-6">Lembretes</span>
-                        <MessageCircleWarning className="w-6 h-6 text-amber-500" />
+                        <span className="pt-6 text-3xl md:text-2xl lg:text-lg">Lembretes</span>
+                        <MessageCircleWarning className="lg:w-6 lg:h-6 md:w-8 md:h-8 w-10 h-10 text-amber-500" />
                     </CardTitle>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>

@@ -14,7 +14,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { Prisma } from '@/generated/prisma'
 import { Button } from '@/components/ui/button'
-import { X, Eye, CalendarClock } from 'lucide-react'
+import { X, Eye, CalendarClock, MoveVertical, EllipsisVertical, ChevronUp, ChevronDown } from 'lucide-react'
 import { cancelAppointment } from '../../_act/cancel-appointment'
 import {
   Dialog,
@@ -24,6 +24,7 @@ import { extractFormatPhone, formatPhone } from '@/app/utils/formatPhone'
 import { DialogAppointment } from './dialog-appointment'
 import Link from 'next/link'
 import { msgError, msgSuccess } from '@/components/custom-toast'
+import { ButtonPickerAppointment } from './button-date'
 
 export type AppointmentWithService = Prisma.AppointmentGetPayload<{
   include: {
@@ -132,12 +133,13 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
       <Card className="pt-3 gap-3">
         <CardHeader className="flex flex-row items-center justify-between pl-6 pr-6 pb-0! mb-0!">
           <CardTitle className="flex flex-row items-center justify-normal text-lg md:text-xl font-semibold">
-            <span className="pt-6">Agendamentos</span>
-            <CalendarClock className="w-6 h-6 text-emerald-600 ml-2" />
+            <span className="pt-6 text-3xl md:text-2xl lg:text-lg">Agendamentos</span>
+            <CalendarClock className="lg:w-6 lg:h-6 md:w-8 md:h-8 w-10 h-10 text-emerald-600" />
           </CardTitle>
+          <ButtonPickerAppointment className="mt-4" />
         </CardHeader>
         <CardContent className="m-0">  
-          <ScrollArea className="h-[404px] lg:h-[504px] xl:h-[664px] lg:max-h-[calc(100vh-15rem)] pr-2 w-full flex-1">
+          <ScrollArea className="h-[404px] lg:h-[504px] xl:h-[664px] lg:max-h-[calc(100vh-15rem)] pr-3 w-full flex-1">
             {isLoading ? (
               <p>Carregando agenda...</p>
             ) : (
@@ -167,11 +169,13 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
                       
                       if (showDetails) {
                         return (
+                          <div key={slot} className="border-t">
                           <div
-                            key={slot}
-                            className='flex items-center py-2 border-t last:border-b'
+                            className={`flex items-center py-2  bg-blue-200 ${
+                              totalSlotsUsed > 1 ? 'rounded-t-md py-0! mt-1' : 'rounded-md my-1'
+                            }`}
                           >
-                            <div className='w-16 text-sm font-semibold'>{slot}</div>
+                            <div className='w-16 text-sm font-semibold pl-1'>{slot}</div>
                             <div className='flex-1 text-sm'>
                               <div className='font-semibold'>{occupant.name}</div>
                               <div className='text-sm text-gray-500'>
@@ -185,9 +189,10 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
                               </div>
                             </div>
                             <div className='ml-auto'>
-                              <div className='flex'>
+                              <div className='flex flex-row items-start justify-between'>
                                 <DialogTrigger asChild>
                                   <Button
+                                    className="mr-1"
                                     variant="ghost"
                                     size="icon"
                                     onClick={() => setDetailAppointment(occupant)}
@@ -197,6 +202,7 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
                                 </DialogTrigger>
 
                                 <Button
+                                  className="mr-1"
                                   variant="ghost"
                                   size="icon"
                                   onClick={() => handleCancelAppointment(occupant.id)}
@@ -206,25 +212,35 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
                               </div>
                             </div>
                           </div>
+                        </div>
                         );
                       } else {
                         // Slot ocupado mas não mostra detalhes (continuação do agendamento anterior)
                         return (
-                          <div
-                            key={slot}
-                            className='flex items-center py-2'
-                          >
-                            <div className='w-16 text-sm font-semibold'>{slot}</div>
-                            {currentSlotCount === totalSlotsUsed ? (
-                              <div className='font-medium text-sm text-gray-600'>
-                                {`Duração de ${Math.floor(occupant.service.duration/60).toString().padStart(2, '0')}h${(occupant.service.duration%60).toString().padStart(2, '0')}min.`}
-                              </div>
+                          currentSlotCount === totalSlotsUsed ? (
+                            <div
+                              key={slot}
+                              className='flex items-center rounded-b-md bg-blue-200 pb-2 mb-1'
+                            >
+                              <div className='w-16 text-sm font-semibold pl-1'>{slot}</div>
+                                <div className='font-medium text-sm text-gray-600 '>
+                                  {`Duração de ${Math.floor(occupant.service.duration/60).toString().padStart(2, '0')}h${(occupant.service.duration%60).toString().padStart(2, '0')}min.`}
+                                </div>
+                            </div>
+
                             ) : (
-                              <div className='flex-1 text-sm text-gray-400'>
-                                {/* Slot ocupado - continuação */}
-                              </div>
-                            )}
-                          </div>
+                            <div
+                              key={slot}
+                              className='flex items-center bg-blue-200'
+                            >   <div className="flex items-center justify-normal w-10 pl-4">
+                                  { currentSlotCount === 2 ? <ChevronUp className="w-3 h-3"/> 
+                                    : (currentSlotCount === (totalSlotsUsed - 1)) ? <ChevronDown className="w-3 h-3"/>
+                                    : <EllipsisVertical className="w-3 h-3"/>
+                                  }
+                                </div>
+                                {/* <div className='w-16 text-sm font-semibold pl-1'>{slot}</div> */}
+                            </div>
+                        )
                         );
                       }
                     } else {
@@ -234,7 +250,7 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
                           key={slot}
                           className='flex items-center py-2 border-t last:border-b'
                         >
-                          <div className='w-16 text-sm font-semibold'>{slot}</div>
+                          <div className='w-16 text-sm font-semibold pl-1'>{slot}</div>
                           <div className='flex-1 text-sm'>
                             Disponível
                           </div>
