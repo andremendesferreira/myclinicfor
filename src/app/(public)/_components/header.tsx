@@ -50,7 +50,7 @@ export function Header() {
                         onClick={() => setIsOpen(false)}
                         key={item.href}
                         variant="ghost"
-                        className=" bg-transparent hover:bg-transparent"
+                        className=" bg-transparent hover:bg-transparent pt-4"
                     >
                         <Link 
                             className='text-zinc-900 hover:text-blue-900 text-base font-semibold'

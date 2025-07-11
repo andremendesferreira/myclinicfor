@@ -132,6 +132,7 @@ export function ServicesList({ services }: ServicesListProps) {
                                 </div>
                             </div>
                             <Separator className="m-3 p-0" />
+                            {/* ToDo: adicinar carregamento */}
                             {services.map(service => (
                                 <article key={service.id} className="flex items-center justify-between">
                                     <div className="flex flex-col items-start min-w-[190px]">

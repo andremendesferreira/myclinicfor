@@ -25,6 +25,7 @@ import { DialogAppointment } from './dialog-appointment'
 import Link from 'next/link'
 import { msgError, msgSuccess } from '@/components/custom-toast'
 import { ButtonPickerAppointment } from './button-date'
+import { LifeLine } from "react-loading-indicators"
 
 export type AppointmentWithService = Prisma.AppointmentGetPayload<{
   include: {
@@ -141,7 +142,9 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
         <CardContent className="m-0">  
           <ScrollArea className="h-[404px] lg:h-[504px] xl:h-[664px] lg:max-h-[calc(100vh-15rem)] pr-3 w-full flex-1">
             {isLoading ? (
-              <p>Carregando agenda...</p>
+              <div className="flex items-center justify-center h-[404px] lg:h-[504px] xl:h-[664px] lg:max-h-[calc(100vh-15rem)] pr-3 w-full flex-1">
+                <LifeLine color="#3191cc" size="medium" text="" textColor="" />
+              </div>
             ) : (
               <>
                 {(() => {
