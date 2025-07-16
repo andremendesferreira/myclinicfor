@@ -60,8 +60,10 @@ model Service {
 }
 
 enum Plan {
-  BASIC
-  PROFESSIONAL
+  FREE // Plano gratuito
+  BASIC // Plano básico
+  PREMIUM // Plano premium
+  PROFESSIONAL // Plano profissional
 }
 
 model Subscription {
