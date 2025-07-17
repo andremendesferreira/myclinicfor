@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation';
 import { getSubscription } from '../_dta/get-subscription';
 import { GridPlans } from './_components/grid-plans';
 import { Banknote } from "lucide-react";
+import { Plan } from "@/generated/prisma";
 
 export default async function Plans(){
 
@@ -16,9 +17,7 @@ export default async function Plans(){
   }
 
   const subscription = await getSubscription({ userId: session.user?.id })
-  if (subscription) {
-    redirect("/change-plan")
-  }
+  const actualPlan: Plan | undefined = Array.isArray(subscription) ? undefined : subscription?.plan;
   
   return (
     <Suspense fallback={
@@ -34,7 +33,7 @@ export default async function Plans(){
       <p className="text-gray-600 text-sm px-4">
         Escolha o plano de assinatura mensal, que melhor se adapta às suas necessidades.
       </p>
-      <GridPlans />
+      <GridPlans actualPlan={actualPlan} />
     </article>
   </Suspense>
 );

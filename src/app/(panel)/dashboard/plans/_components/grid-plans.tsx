@@ -5,6 +5,12 @@ import basicImg from '../../../../../../public/basic.png';
 import profImg from '../../../../../../public/professional.png';
 import premiumImg from '../../../../../../public/premium.png';
 import Image from "next/image";
+import { BillingButton } from "./billing-button";
+import { Plan } from "@/generated/prisma"
+
+interface PlanProps {
+    types: Plan;
+}
 
 // Tipo para configuração de personalização de cada plano
 type PlanCustomization = {
@@ -13,6 +19,8 @@ type PlanCustomization = {
   badge: React.ReactNode | null;
   buttonText: string;
   buttonClass: string;
+  planId: string;
+  type: PlanProps
 };
 
 // Configuração para personalização de cada plano
@@ -22,33 +30,41 @@ const PLAN_CUSTOMIZATIONS: Record<number, PlanCustomization> = {
     titleClass: "text-gray-700 pt-10 text-3xl md:text-2xl lg:text-lg",
     badge: <Image src={freeImg} alt="Grátis" width={48} height={48} className="inline-block mr-2 pt-1" />,
     buttonText: "Contratar",
-    buttonClass: "bg-gray-600 hover:bg-gray-700 text-white"
+    buttonClass: "bg-gray-600 hover:bg-gray-700 text-white",
+    planId: process.env.NEXT_PUBLIC_STRIPE_FREE_PLAN_ID as string || "free-plan",
+    type: { types: "FREE" }
   },
   1: {
     cardClass: "shadow-xl border-blue-300 bg-blue-50",
     titleClass: "text-blue-700 pt-10 text-3xl md:text-2xl lg:text-lg",
     badge: <Image src={basicImg} alt="Básico" width={48} height={48} className="inline-block mr-2 pt-1" />,
     buttonText: "Contratar",
-    buttonClass: "bg-blue-600 hover:bg-blue-700 text-white"
+    buttonClass: "bg-blue-600 hover:bg-blue-700 text-white",
+    planId: process.env.NEXT_PUBLIC_STRIPE_BASIC_PLAN_ID as string || "basic-plan", // Use environment variable or default value
+    type: { types: "BASIC" }
   },
   2: {
     cardClass: "shadow-lg border-green-200 bg-green-50",
     titleClass: "text-green-700 pt-10 text-3xl md:text-2xl lg:text-lg",
     badge: <Image src={profImg} alt="Profissional" width={48} height={48} className="inline-block mr-2 pt-1" />,
     buttonText: "Contratar",
-    buttonClass: "bg-green-600 hover:bg-green-700 text-white"
+    buttonClass: "bg-green-600 hover:bg-green-700 text-white",
+    planId: process.env.NEXT_PUBLIC_STRIPE_PROFESSIONAL_PLAN_ID as string || "professional-plan", // Use environment variable or default value
+    type: { types: "PROFESSIONAL" }
   },
   3: {
     cardClass: "shadow-lg border-purple-200 bg-purple-50",
     titleClass: "text-purple-700 pt-10 text-3xl md:text-2xl lg:text-lg",
     badge: <Image src={premiumImg} alt="Premium" width={64} height={64} className="inline-block mr-2" />,
     buttonText: "Contratar",
-    buttonClass: "bg-purple-600 hover:bg-purple-700 text-white"
+    buttonClass: "bg-purple-600 hover:bg-purple-700 text-white",
+    planId: process.env.NEXT_PUBLIC_STRIPE_PREMIUM_PLAN_ID as string || "premium-plan", // Use environment variable or default value
+    type: { types: "PREMIUM" }
   }
 };
 
 // Componente reutilizável para exibir cada plano
-function PlanCard({ plan, index }: { plan: PlanDetailProps; index: number }) {
+function PlanCard({ plan, index, actualPlan }: { plan: PlanDetailProps; index: number; actualPlan?: Plan }) {
   const customization = PLAN_CUSTOMIZATIONS[index] || PLAN_CUSTOMIZATIONS[0];
   
   return (
@@ -87,23 +103,33 @@ function PlanCard({ plan, index }: { plan: PlanDetailProps; index: number }) {
       
       <CardFooter className="mt-auto">
         <CardAction className="w-full h-full flex justify-end-safe items-center">
-          <button className={`w-full py-2 px-4 rounded-md transition-colors ${customization.buttonClass}`}>
-            {customization.buttonText}
-          </button>
+          {actualPlan && actualPlan === customization.type.types ? (
+            <div className={`hover:cursor-not-allowed w-full h-9 flex items-center justify-center py-2 px-4 rounded-md bg-gray-300 text-gray-700`}>
+              Ativo
+            </div>
+          ) : (
+            <BillingButton 
+              planId={customization.planId} 
+              className={`w-full py-2 px-4 rounded-md transition-colors ${customization.buttonClass}`}
+              textBtn={customization.buttonText}
+              type={customization.type}
+          />
+          )}
+
         </CardAction>
       </CardFooter>
     </Card>
   );
 }
 
-export function GridPlans() {
+export function GridPlans({ actualPlan }: { actualPlan?: Plan | undefined }) {
   const plans = Object.values(PLANS);
   
   return (
     <article>
       <section className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {plans.map((plan, index) => (
-          <PlanCard key={index} plan={plan} index={index} />
+          <PlanCard key={index} plan={plan} index={index} actualPlan={actualPlan || undefined} />
         ))}
       </section>
     </article>
