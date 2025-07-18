@@ -7,7 +7,8 @@ import premiumImg from '../../../../../../public/premium.png';
 import Image from "next/image";
 import { BillingButton } from "./billing-button";
 import { Plan } from "@/generated/prisma"
-
+import { formatCurrecy } from "@/app/utils/formatCurrency"
+ 
 interface PlanProps {
     types: Plan;
 }
@@ -91,13 +92,13 @@ function PlanCard({ plan, index, actualPlan }: { plan: PlanDetailProps; index: n
         </ul>
         <p className="text-2xl font-bold mt-4">
           {plan.activatePromo ? (
-            <>
-              <span className="text-gray-400 line-through text-lg mr-2">R$ {plan.price}</span>
-              <span className="text-gray-600">R$ {plan.promoPrice}</span>
-            </>
-          ) : (
-            `R$ ${plan.price}`
-          )}
+            <div className="flex flex-row items-center justify-around">
+              <span className="text-gray-400 line-through text-lg mr-2">{formatCurrecy(plan.price)}</span>
+              <span className="text-gray-600">{formatCurrecy(plan.promoPrice)}</span>
+            </div>
+          ) : (<div className="flex flex-row items-center justify-between">
+            `${formatCurrecy(plan.price)}`
+          </div>)}
         </p>
       </CardContent>
       
@@ -108,6 +109,33 @@ function PlanCard({ plan, index, actualPlan }: { plan: PlanDetailProps; index: n
               Ativo
             </div>
           ) : (
+            // ToDo: adicionar condição em caixa de diálogo para troca de plano pago vigente para gratuíto.
+            /*
+            // Função para cancelar uma assinatura
+            async function cancelSubscription(subscriptionId, options = {}) {
+              try {
+                const subscription = await stripe.subscriptions.cancel(subscriptionId, {
+                  // Cancelar imediatamente (padrão)
+                  prorate: options.prorate || false,
+                  
+                  // Ou cancelar no final do período atual
+                  cancel_at_period_end: options.cancelAtPeriodEnd || false,
+                  
+                  // Adicionar feedback do cancelamento
+                  cancellation_details: {
+                    comment: options.comment || 'Cancelamento solicitado pelo usuário',
+                    feedback: options.feedback || 'other'
+                  }
+                });
+
+                console.log('Assinatura cancelada:', subscription.id);
+                return subscription;
+              } catch (error) {
+                console.error('Erro ao cancelar assinatura:', error);
+                throw error;
+              }
+            }
+            */
             <BillingButton 
               planId={customization.planId} 
               className={`w-full py-2 px-4 rounded-md transition-colors ${customization.buttonClass}`}

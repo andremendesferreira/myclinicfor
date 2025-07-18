@@ -33,7 +33,7 @@ export function BillingButton({ planId, className, textBtn, type, disabled }: Bi
         if (response.type === "success" && response.sessionId) {
             const stripeJs = await getStripeJs();
             stripeJs.redirectToCheckout({ sessionId: response.sessionId });
-            msgSuccess(response.message);
+            // msgSuccess(response.message);
         } else if (response.type === "success" && !response.sessionId) {
             msgSuccess(response.message);
         } else if (response.type === "info") {
@@ -43,6 +43,7 @@ export function BillingButton({ planId, className, textBtn, type, disabled }: Bi
         } else {
             msgError(response.message);
         }
+
         return;
     }
 

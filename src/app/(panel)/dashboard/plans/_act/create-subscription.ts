@@ -4,7 +4,7 @@ import { auth } from "@/lib/auth";
 import { stripe } from "@/stripe/stripe";
 import prisma from "@/lib/prisma";
 import { Plan } from "@/generated/prisma"
-
+import { revalidatePath } from 'next/cache';
 
 interface PlanProps {
     types: Plan;
@@ -81,6 +81,9 @@ export async function handleBilling(planId: string, {types}: PlanProps ) {
                         message: "Plano gratuito ativado com sucesso."
                     }
                     console.log("Usuário atualizado para plano gratuito.");
+
+                    revalidatePath("/dashboard/plans");
+                    
                     return data;
 
                 } else {
