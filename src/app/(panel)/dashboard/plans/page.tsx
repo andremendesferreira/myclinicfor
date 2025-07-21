@@ -4,7 +4,7 @@ import { LifeLine } from "react-loading-indicators";
 import getSesion from '@/lib/getSession';
 import { redirect } from 'next/navigation';
 import { getSubscription } from '../_dta/get-subscription';
-import { GridPlans } from './_components/grid-plans';
+import { GridPlans } from './_components/grip-plans';
 import { Banknote } from "lucide-react";
 import { Plan } from "@/generated/prisma";
 

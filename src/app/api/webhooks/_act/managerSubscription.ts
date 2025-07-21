@@ -110,12 +110,18 @@ export async function manageSubscription(
 
         break;
 
+        // Migrar para plano gratuíto em caso de cancelamento.
         case 'delete':
 
             try{
-                await prisma.subscription.delete({
+
+                await prisma.subscription.update({
                 where: {
-                    userId: findUser.id
+                    id: findUser.id
+                },
+                data: {
+                    priceId: 'free-plan',
+                    plan: "FREE",
                 }
             });
 

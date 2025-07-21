@@ -29,12 +29,13 @@ export function Professionals({ professionals }: ProfessionalsProps): React.Reac
           </p>
           <section className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {professionals.map((clinic) => (
-              <Card className="overflow-hidden hover:shadow-lg duration-300" key={clinic.id}>
+              <Card className="overflow-hidden p-0 hover:shadow-lg duration-300" key={clinic.id}>
                 <CardContent className="p-0">
                   <div className="relative h-48">
                     <Image
                       src={clinic.image ?? ftProf1}
                       alt="Foto da clinica"
+                      sizes="(max-width: 400px) 100vw, 33vw"
                       fill
                       className="object-cover"
                     />
