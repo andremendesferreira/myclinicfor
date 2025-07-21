@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { msgError } from "@/components/custom-toast";
 import { DowngradeDialogProps } from "../_types/plan.types";
 import { MessageCircleWarningIcon } from "lucide-react";
+import { goPortalCustomer } from "../_act/go-portal-customer";
 
 export function DowngradeDialog({ 
   isOpen, 
@@ -21,9 +23,16 @@ export function DowngradeDialog({
     try {
       await onConfirm();
       onOpenChange(false);
-      console.log('Implementar downgrade para plano FREE.')
+      const response = await goPortalCustomer();
+      if (response.error){
+        msgError("Erro ao tentar abrir portal de assinatura.");
+        return;
+      }
+
+      window.location.href = response.sessionId;
+      
     } catch (error) {
-      console.error('Erro ao processar downgrade:', error);
+      msgError(`Erro ao processar downgrade: ${error}`);
     } finally {
       setIsProcessing(false);
     }

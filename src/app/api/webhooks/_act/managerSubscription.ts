@@ -115,14 +115,26 @@ export async function manageSubscription(
 
             try{
 
+                const findSubscription = await prisma.subscription.findFirst({
+                    where: {
+                        userId: findUser.id,
+                    }
+                })
+
+                // Sair caso não exista uma inscrição
+                console.log(findSubscription?.id)
+                if (!findSubscription) return;
+                
                 await prisma.subscription.update({
                 where: {
-                    id: findUser.id
+                    userId: findUser.id
                 },
                 data: {
+                    status: 'Downgrade',
                     priceId: 'free-plan',
                     plan: "FREE",
                 }
+
             });
 
             return;

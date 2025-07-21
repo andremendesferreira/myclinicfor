@@ -69,7 +69,7 @@ export const POST = async (request: Request) => {
     // Cancelar assinatura atual
     case 'customer.subscription.deleted':
         const deletedSubscription = event.data.object as Stripe.Subscription;
-        console.log("Cancelar assinatura atual:", deletedSubscription);
+
         await manageSubscription(
             deletedSubscription.id,
             deletedSubscription.customer.toString(),
