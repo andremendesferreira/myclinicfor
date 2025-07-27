@@ -23,7 +23,7 @@ export const PLANS: PlansProps = {
   FREE: {
     name: "Grátis",
     maxServices: 1,
-    menuLayout: 1,
+    menuLayout: 0,
     description: {
         title: "Plano Gratuito",
         text: "Ideal para quem está começando.",
@@ -42,7 +42,7 @@ export const PLANS: PlansProps = {
   BASIC: {
     name: "Básico",
     maxServices: 5,
-    menuLayout: 2,
+    menuLayout: 1,
     description: {
         title: "Plano Básico",
         text: "Perfeito para pequenas clínicas.",
@@ -62,7 +62,7 @@ export const PLANS: PlansProps = {
   PROFESSIONAL: {
     name: "Profissional",
     maxServices: 25,
-    menuLayout: 3,
+    menuLayout: 2,
     description: {
         title: "Plano Profissional",
         text: "Ótimo para clínicas de médio porte.",
@@ -86,7 +86,7 @@ export const PLANS: PlansProps = {
   PREMIUM: {
     name: "Premium",
     maxServices: 50,
-    menuLayout: 4,
+    menuLayout: 3,
     description: {
         title: "Plano Premium",
         text: "Ideal para clínicas de grande porte.",

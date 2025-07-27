@@ -28,18 +28,23 @@ import { convertCentsToReal } from '@/app/utils/convertCurrency';
 import { formatCurrecy } from '@/app/utils/formatCurrency';
 import { deleteService, inativeService } from '../_act/delete-service';
 import { msgError, msgSuccess } from '@/components/custom-toast';
+import { ResultPermissionProps } from '@/app/utils/permissions/verify-permission';
+import Link from 'next/link';
 
 interface ServicesListProps {
     services: Service[];
+    permission: ResultPermissionProps;
 }
 
-export function ServicesList({ services }: ServicesListProps) {
+export function ServicesList({ services, permission }: ServicesListProps) {
     // Diálogo de serviço.
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     // Diálogo de edição de serviço
     const [isEditService, setIsEditService] = useState<null | Service>(null);
     // Diálogo de autorização de remoção de serviço.
     const [isAuthorizationDialogOpen, setIsAuthorizationDialogOpen] = useState(false);
+    
+    console.log(permission);
 
     useEffect(() => {
         // Resetar o serviço editado quando os serviços mudam
@@ -85,11 +90,18 @@ export function ServicesList({ services }: ServicesListProps) {
                             <BriefcaseBusiness className="w-10 h-10 mr-4 text-emerald-500" />
                             <span className='text-3xl text-shadow-md lg:text-2xl'> Serviços</span>
                         </CardTitle>
-                        <DialogTrigger asChild>
-                            <Button className="bg-emerald-700 text-white hover:bg-emerald-600 hover:shadow-sm hover:shadow-emerald-200">
-                                <Plus className="w-4 h-4 " />
-                            </Button>
-                        </DialogTrigger>
+                        {permission.hasPermission && (
+                            <DialogTrigger asChild>
+                                <Button className="bg-emerald-700 text-white hover:bg-emerald-600 hover:shadow-sm hover:shadow-emerald-200">
+                                    <Plus className="w-4 h-4 " />
+                                </Button>
+                            </DialogTrigger>
+                        )}
+                        {!permission.hasPermission && (
+                            <Link href="/dashboard/plans" className="text-red-400 font-semibold text-base">
+                                Limite de serviços ativos atingido.
+                            </Link>
+                        )}
                         <DialogContent
                             onInteractOutside={(e) => {
                                 e.preventDefault();
@@ -148,17 +160,28 @@ export function ServicesList({ services }: ServicesListProps) {
                                         >
                                             <Pencil className="w-4 h-4" />
                                         </Button>
-                                        <Button
+
+                                        { service.status ? (
+                                            <Button
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => handleInactiveService(service.id, service.status)}
                                             className="ml-3 mr-1"
-                                        >
-                                            {service.status ?
-                                                (<ToggleRight className="w-4 h-4 text-green-500" />) :
-                                                (<ToggleLeft className="w-4 h-4 text-red-600" />)
-                                            }
-                                        </Button>
+                                            
+                                            >
+                                                <ToggleRight className="w-4 h-4 text-green-500" />
+                                            </Button>
+                                        ):(
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => handleInactiveService(service.id, service.status)}
+                                                className="ml-3 mr-1"
+                                                disabled={!permission.hasPermission}
+                                            >
+                                                    <ToggleLeft className="w-4 h-4 text-red-600" />
+                                            </Button>
+                                        )}
                                         <Dialog open={isAuthorizationDialogOpen} onOpenChange={setIsAuthorizationDialogOpen}>
                                             <DialogTrigger asChild>
                                                 <Button
