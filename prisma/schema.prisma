@@ -79,6 +79,16 @@ model Subscription {
   user   User   @relation(fields: [userId], references: [id])
 }
 
+model Activity {
+  id        String      @id @default(uuid())
+  name      String      @unique
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt  
+
+  userId    String?  
+  user      User?    @relation(fields: [userId], references: [id]) 
+}
+
 model User {
   id                 String    @id @default(cuid())
   name               String?
@@ -96,6 +106,9 @@ model User {
   services     Service[]
   reminders    Reminder[]
   appointments Appointment[]
+
+  // Um usuário pode ter diversas atividades
+  activities         Activity[] // Relacionamento um-para-muitos
 
   accounts      Account[]
   sessions      Session[]

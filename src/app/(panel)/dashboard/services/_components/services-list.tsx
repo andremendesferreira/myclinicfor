@@ -21,7 +21,7 @@ import {
 } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { BriefcaseBusiness, Pencil, Plus, Trash, ToggleRight, ToggleLeft, Ban } from 'lucide-react';
+import { BriefcaseBusiness, Pencil, Plus, Trash, ToggleRight, ToggleLeft, Ban, BlocksIcon, Lock } from 'lucide-react';
 import { DialogService } from './dialog-service';
 import { Service } from '@/generated/prisma';
 import { convertCentsToReal } from '@/app/utils/convertCurrency';
@@ -30,6 +30,8 @@ import { deleteService, inativeService } from '../_act/delete-service';
 import { msgError, msgSuccess } from '@/components/custom-toast';
 import { ResultPermissionProps } from '@/app/utils/permissions/verify-permission';
 import Link from 'next/link';
+
+
 
 interface ServicesListProps {
     services: Service[];
@@ -44,7 +46,14 @@ export function ServicesList({ services, permission }: ServicesListProps) {
     // Diálogo de autorização de remoção de serviço.
     const [isAuthorizationDialogOpen, setIsAuthorizationDialogOpen] = useState(false);
     
-    console.log(permission);
+    let description:string[] = [];
+    let planName: string;
+
+    if (permission.plan){
+        planName = (permission.plan as any).name;
+        for (const feature of (permission.plan as any).description.features) {
+            description.push(feature);
+    }
 
     useEffect(() => {
         // Resetar o serviço editado quando os serviços mudam
@@ -98,8 +107,9 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                             </DialogTrigger>
                         )}
                         {!permission.hasPermission && (
-                            <Link href="/dashboard/plans" className="text-red-400 font-semibold text-base">
-                                Limite de serviços ativos atingido.
+                            <Link href="/dashboard/plans" className="text-red-400 font-semibold text-base flex flex-row items-center justify-between">
+                                <Lock className="w-5 h-5 text-red-500 mr-2" type="icon"/>
+                                <span>Limite de serviços ativo atingido.</span>
                             </Link>
                         )}
                         <DialogContent
@@ -146,11 +156,15 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                             <Separator className="m-3 p-0" />
                             {/* ToDo: adicinar carregamento */}
                             {services.map(service => (
-                                <article key={service.id} className="flex items-center justify-between">
-                                    <div className="flex flex-col items-start min-w-[190px]">
+                                <div key={service.id}>
+                                <article  className="flex items-center justify-between">
+                                    <div className="flex flex-col items-start min-w-[190px] w-full">
                                         <span className="font-semibold break-words overflow-hidden">{service.name}</span>
                                         <span className="font-semibold text-zinc-600">{formatCurrecy(convertCentsToReal(service.price.toString()))}</span>
                                     </div>
+                                        <div className='flex items-end justify-end h-12 w-full'>
+                                                <Separator orientation="vertical" className="mr-1" />
+                                        </div>
                                     <div suppressHydrationWarning={true} className="min-w-[155px]">
                                         <Button
                                             variant="ghost"
@@ -160,7 +174,6 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                                         >
                                             <Pencil className="w-4 h-4" />
                                         </Button>
-
                                         { service.status ? (
                                             <Button
                                             variant="ghost"
@@ -223,13 +236,30 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                                                 </DialogFooter>
                                             </DialogContent>
                                         </Dialog>
+
                                     </div>
                                 </article>
+                                <Separator className="m-3 p-0" />
+                                </div>
                             ))}
                         </section>
                     </CardContent>
+                    {!permission.hasPermission && (
+                        <CardFooter>
+                            <div className="flex flex-col items-center w-full">
+                                <p className="font-semibold text-zinc-800">Informações do plano - {planName}:</p>
+                                {description.map((feature, index) => (
+                                <p className="text-sm text-zinc-700" key={index}>
+                                {index === 0 ?feature:''}
+                                </p>
+                                ))}
+                            </div>
+                        </CardFooter>
+                        )
+                    }
                 </Card>
             </section>
         </Dialog>
     );
+}
 }

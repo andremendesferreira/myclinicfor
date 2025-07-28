@@ -249,10 +249,12 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                         <SelectValue placeholder="Selecione um serviço" />
                       </SelectTrigger>
                       <SelectContent>
-                        {clinic.services.map((service) => (
-                          <SelectItem key={service.id} value={service.id}>
-                            {service.name} - {Math.floor(service.duration / 60)}h {service.duration % 60}min
-                          </SelectItem>
+                        {clinic.services
+                          .filter(service => service.status)
+                          .map(service => (
+                            <SelectItem key={service.id} value={service.id}>
+                              {service.name} - {Math.floor(service.duration / 60)}h {service.duration % 60}min
+                            </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
