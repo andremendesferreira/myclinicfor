@@ -46,6 +46,8 @@ export function ServicesList({ services, permission }: ServicesListProps) {
     // Diálogo de autorização de remoção de serviço.
     const [isAuthorizationDialogOpen, setIsAuthorizationDialogOpen] = useState(false);
     
+     const servicesList = permission.hasPermission ? services : services.slice(0, (permission.plan?.maxServices! + 5));
+
     let description:string[] = [];
     let planName: string;
 
@@ -155,7 +157,7 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                             </div>
                             <Separator className="m-3 p-0" />
                             {/* ToDo: adicinar carregamento */}
-                            {services.map(service => (
+                            {servicesList.map(service => (
                                 <div key={service.id}>
                                 <article  className="flex items-center justify-between">
                                     <div className="flex flex-col items-start min-w-[190px] w-full">
@@ -250,7 +252,7 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                                 <p className="font-semibold text-zinc-800">Informações do plano - {planName}:</p>
                                 {description.map((feature, index) => (
                                 <p className="text-sm text-zinc-700" key={index}>
-                                {index === 0 ?feature:''}
+                                {index < 2 ?feature:''}
                                 </p>
                                 ))}
                             </div>

@@ -29,6 +29,7 @@ export const PLANS: PlansProps = {
         text: "Ideal para quem está começando.",
         features: [
             "Limite de serviço ativo 1",
+            "Limite cadastro de serviço 5",
             "Agendamento de consultas",
             "Página de agendamento",
             "Contato com suporte",
@@ -48,6 +49,7 @@ export const PLANS: PlansProps = {
         text: "Perfeito para pequenas clínicas.",
         features: [
             "Limite de serviço ativo 5",
+            "Limite cadastro de serviço 10",
             "Agendamento de consultas",
             "Página de agendamento",
             "Personalização de perfil",
@@ -68,6 +70,7 @@ export const PLANS: PlansProps = {
         text: "Ótimo para clínicas de médio porte.",
         features: [
             "Limite de serviço ativo 25",
+            "Limite cadastro de serviço 30",
             "Agendamento de consultas",
             "Página de agendamento",
             "Registro de consultas",            
@@ -92,6 +95,7 @@ export const PLANS: PlansProps = {
         text: "Ideal para clínicas de grande porte.",
         features: [
             "Limite de serviço ativo 50",
+            "Limite cadastro de serviço 55",
             "Agendamento de consultas",
             "Página de agendamento",
             "Registro de consultas",            

@@ -37,10 +37,9 @@ interface AppointmentsListProps {
   times: string[]
 }
 
-export function AppointmentsList({ times }: AppointmentsListProps) {
-
+export function AppointmentsList({ times }: AppointmentsListProps) { 
   const searchParams = useSearchParams();
-  const date = searchParams.get("date");
+  const date = searchParams.get("date") === null ? format(new Date(), "yyyy-MM-dd") : searchParams.get("date");
   const queryClient = useQueryClient();
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [detailAppointment, setDetailAppointment] = useState<AppointmentWithService | null>(null)
@@ -77,14 +76,21 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
   // Se um Appointment começa no time (15:00) e tem requiredSlots 2
   // occupantMap["15:00", appoitment] occupantMap["15:30", appoitment] 
   const occupantMap: Record<string, AppointmentWithService> = {}
-
+  const hoje = format(new Date(), "yyyy-MM-dd")
+  const newDate = new Date(date || hoje)
+  
+  const weekDayIndex: string = `${newDate.getUTCDay()}`;
+  const timesFiltered = times
+  .filter(time => time.startsWith(`${weekDayIndex}-`))
+  .map(time => time.replace(`${weekDayIndex}-`, ''));
   if (data && data.length > 0) {
+
     for (const appointment of data) {
       // Calcular quantos slots necessarios ocupa
       const requiredSlots = Math.ceil(appointment.service.duration / 30);
 
       // Descobrir qual é o indice do nosso array de horarios esse agendamento começa.
-      const startIndex = times.indexOf(appointment.time)
+      const startIndex = timesFiltered.indexOf(appointment.time)
 
       // Se encontrou o index
       if (startIndex !== -1) {
@@ -92,8 +98,8 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
         for (let i = 0; i < requiredSlots; i++) {
           const slotIndex = startIndex + i;
 
-          if (slotIndex < times.length) {
-            occupantMap[times[slotIndex]] = appointment;
+          if (slotIndex < timesFiltered.length) {
+            occupantMap[timesFiltered[slotIndex]] = appointment;
           }
         }
       }
@@ -116,13 +122,21 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
   // Função para verificar se deve mostrar os detalhes do agendamento
   function shouldShowAppointmentDetails(slot: string, occupant: AppointmentWithService): boolean {
     // Encontra o índice do slot atual
-    const currentIndex = times.indexOf(slot);
+    const date = searchParams.get("date") === null ? format(new Date(), "yyyy-MM-dd") : searchParams.get("date");
+    const hoje = format(new Date(), "yyyy-MM-dd")
+    const newDate = new Date(date || hoje)
+    const weekDayIndex: string = `${newDate.getUTCDay()}`;
+    const timesFiltered = times
+    .filter(time => time.startsWith(`${weekDayIndex}-`))
+    .map(time => time.replace(`${weekDayIndex}-`, ''));
+
+    const currentIndex = timesFiltered.indexOf(slot);
     
     // Se for o primeiro slot, sempre mostra
     if (currentIndex === 0) return true;
     
     // Verifica se o slot anterior tem o mesmo agendamento
-    const previousSlot = times[currentIndex - 1];
+    const previousSlot = timesFiltered[currentIndex - 1];
     const previousOccupant = occupantMap[previousSlot];
     
     // Se o slot anterior não tem o mesmo agendamento, mostra os detalhes
@@ -150,8 +164,16 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
                 {(() => {
                   // Contador para cada agendamento
                   const slotCounters: Record<string, number> = {};
-                  
-                  return times.map((slot) => {
+                  const date = searchParams.get("date") === null ? format(new Date(), "yyyy-MM-dd") : searchParams.get("date");
+                  const hoje = format(new Date(), "yyyy-MM-dd")
+                  const newDate = new Date(date || hoje)
+                  const weekDayIndex: string = `${newDate.getUTCDay()}`;
+                  const timesFiltered = times
+                  .filter(time => time.startsWith(`${weekDayIndex}-`))
+                  .map(time => time.replace(`${weekDayIndex}-`, ''));                  
+
+                  return timesFiltered.map((slot) => {
+                    console.log(slot)
                     const occupant = occupantMap[slot];
                     
                     if (occupant) {

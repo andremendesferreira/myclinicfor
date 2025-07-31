@@ -1,7 +1,7 @@
 "use client"
 import { useState } from 'react'
 import { ProfileFormData, useProfileForm } from './profile-form'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import {
   Form,
   FormControl,
@@ -29,6 +29,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog'
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs'
 
 import { Button } from '@/components/ui/button'
 import { ArrowRight, UserRoundCog } from 'lucide-react'
@@ -62,6 +68,16 @@ export function ProfileContent({ user }: ProfileContentProps) {
     timeZone: user.timeZone
   });
 
+  // Dias da semana com seus respectivos identificadores
+  const weekDays = [
+    { id: 1, name: 'Segunda-feira', short: 'SEG' },
+    { id: 2, name: 'Terça-feira', short: 'TER' },
+    { id: 3, name: 'Quarta-feira', short: 'QUA' },
+    { id: 4, name: 'Quinta-feira', short: 'QUI' },
+    { id: 5, name: 'Sexta-feira', short: 'SEX' },
+    { id: 6, name: 'Sábado', short: 'SAB' },
+    { id: 0, name: 'Domingo', short: 'DOM' }
+  ];
 
   function generateTimeSlots(): string[] {
     const hours: string[] = [];
@@ -83,14 +99,32 @@ export function ProfileContent({ user }: ProfileContentProps) {
       }
     }
 
-    return hours;
-
-  }
+    return hours;}
 
   const hours = generateTimeSlots();
 
-  function toggleHour(hour: string) {
-    setSelectedHours((prev) => prev.includes(hour) ? prev.filter(h => h !== hour) : [...prev, hour].sort())
+  function toggleHour(dayId: number, hour: string) {
+    const timeSlot = `${dayId}-${hour}`;
+    
+    setSelectedHours((prev) => {
+      if (prev.includes(timeSlot)) {
+        return prev.filter(h => h !== timeSlot)
+      } else {
+        return [...prev, timeSlot].sort()
+      }
+    })
+  }
+
+  // Função para obter horários selecionados de um dia específico
+  function getSelectedHoursForDay(dayId: number): string[] {
+    return selectedHours
+      .filter(timeSlot => timeSlot.startsWith(`${dayId}-`))
+      .map(timeSlot => timeSlot.split('-')[1])
+  }
+
+  // Função para verificar se um horário está selecionado para um dia específico
+  function isHourSelected(dayId: number, hour: string): boolean {
+    return selectedHours.includes(`${dayId}-${hour}`)
   }
 
   const timeZones = Intl.supportedValuesOf("timeZone").filter((zone) =>
@@ -260,40 +294,93 @@ export function ProfileContent({ user }: ProfileContentProps) {
                       </Button>
                     </DialogTrigger>
 
-                    <DialogContent>
+                    <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
                       <DialogHeader>
-                        <DialogTitle>Horários de atendimento</DialogTitle>
+                        <DialogTitle>Horários de atendimento por dia da semana</DialogTitle>
                         <DialogDescription>
-                          Selecione abaixo os horários de funcionamento:
+                          Selecione os horários de funcionamento para cada dia da semana:
                         </DialogDescription>
                       </DialogHeader>
 
-                      <section className='py-4'>
-                        <p className='text-sm text-muted-foreground mb-2'>
-                          Clique nos horários abaixo para marcar ou desmcar:
-                        </p>
-
-                        <div className='grid grid-cols-5 gap-2'>
-                          {hours.map((hour) => (
-                            <Button
-                              key={hour}
-                              variant="outline"
-                              className={cn('h-10', selectedHours.includes(hour) && 'border-2 border-emerald-500 text-primary')}
-                              onClick={() => toggleHour(hour)}
-                            >
-                              {hour}
-                            </Button>
+                      <Tabs defaultValue="1" className="w-full">
+                        <TabsList className="grid w-full grid-cols-7">
+                          {weekDays.map((day) => (
+                            <TabsTrigger key={day.id} value={day.id.toString()}>
+                              {day.short}
+                            </TabsTrigger>
                           ))}
-                        </div>
+                        </TabsList>
 
-                      </section >
+                        {weekDays.map((day) => (
+                          <TabsContent key={day.id} value={day.id.toString()}>
+                            <Card>
+                              <CardHeader>
+                                <CardTitle className="text-lg">{day.name}</CardTitle>
+                                <CardDescription>
+                                  Horários selecionados: {getSelectedHoursForDay(day.id).length} 
+                                  {getSelectedHoursForDay(day.id).length > 0 && 
+                                    ` (${getSelectedHoursForDay(day.id).join(', ')})`
+                                  }
+                                </CardDescription>
+                              </CardHeader>
+                              <CardContent>
+                                <p className='text-sm text-muted-foreground mb-3'>
+                                  Clique nos horários abaixo para marcar ou desmarcar:
+                                </p>
 
-                      <Button
-                        className='w-full'
-                        onClick={() => setDialogIsOpen(false)}
-                      >
-                        Sair
-                      </Button>
+                                <div className='grid grid-cols-5 gap-2'>
+                                  {hours.map((hour) => (
+                                    <Button
+                                      key={hour}
+                                      type="button"
+                                      variant="outline"
+                                      className={cn(
+                                        'h-10', 
+                                        isHourSelected(day.id, hour) && 'border-2 border-emerald-500 bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
+                                      )}
+                                      onClick={() => toggleHour(day.id, hour)}
+                                    >
+                                      {hour}
+                                    </Button>
+                                  ))}
+                                </div>
+
+                                {getSelectedHoursForDay(day.id).length > 0 && (
+                                  <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                                    <p className="text-sm font-medium text-gray-700">
+                                      Horários selecionados para {day.name}:
+                                    </p>
+                                    <p className="text-sm text-gray-600 mt-1">
+                                      {getSelectedHoursForDay(day.id).join(' • ')}
+                                    </p>
+                                  </div>
+                                )}
+                              </CardContent>
+                            </Card>
+                          </TabsContent>
+                        ))}
+                      </Tabs>
+
+                      <div className="flex gap-2 mt-4">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className='flex-1'
+                          onClick={() => {
+                            // Limpar todos os horários selecionados
+                            setSelectedHours([])
+                          }}
+                        >
+                          Limpar Todos
+                        </Button>
+                        <Button
+                          type="button"
+                          className='flex-1 bg-emerald-600 hover:bg-emerald-500'
+                          onClick={() => setDialogIsOpen(false)}
+                        >
+                          Salvar Horários
+                        </Button>
+                      </div>
 
                     </DialogContent>
                   </Dialog>
@@ -307,7 +394,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className='font-semibold'>
-                        Selecione o fuso horário
+                        Selecione o fuso horário
                       </FormLabel>
                       <FormControl>
 

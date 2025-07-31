@@ -60,8 +60,8 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
         // console.log(date.toISOString().split("T")[0])
         const dtString = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes())).toISOString().split("T")[0];
         const urlFetch = `${process.env.NEXT_PUBLIC_URL}/api/schedule/get-appointments?userId=${clinic.id}&date=${dtString}`
+        //console.log(urlFetch);
         const response = await fetch(urlFetch);
-
         const json = await response.json();
         setLoadingSlots(false);
         return json;
@@ -90,20 +90,44 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
         // console.log("Horários reservados: ", blocked)
         setBlockedTimes(blocked);
 
-        const times = clinic.times || [];
-        const finalSlot = times.map((time) => ({
+        // Função para normalizar o selectedTime para comparação
+        // const normalizeSelectedTime = (time: string) => {
+        //   if (time.includes('-')) {
+        //     return time.split('-')[1]; // Remove o prefixo do dia se existir
+        //   }
+        //   console.log(`Tempo normalizado: ${time}`);
+        //   return time;
+        // };
+
+        const weekDayIndex: string = `${selectedDate.getUTCDay()}`;
+        
+        const clinicTimesFiltered = clinic.times
+        .filter(time => time.startsWith(`${weekDayIndex}-`))
+        .map(time => time.replace(`${weekDayIndex}-`, ''));
+
+
+        const times = clinicTimesFiltered;
+        const finalSlot = times.map((time) => (
+          {
           time: time,
           available: !blocked.includes(time)
         }))
         
+        //console.log(finalSlot)
+
         setAvailableTimeSlots(finalSlot);
 
         // Verificar se o slot estiver disponível, limpar a seleção
+
         const stillAvailable = finalSlot.find(
-          (slot) => slot.time === selectedTime && slot.available
+          (slot) => {
+            //console.log(`Verificar: `, slot.time, ` `, selectedTime, ` `, slot.available  )
+            return slot.time === selectedTime && slot.available
+          }
         )
         
         if(!stillAvailable){
+          // console.log(`passou aqui.`)
           setSelectedTime("");
         }
       })
@@ -135,9 +159,16 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
     setSelectedTime("");
 
     router.refresh();
+
+    reloadAfterDelay();
     
   }
 
+  function reloadAfterDelay() {
+      setTimeout(() => {
+          window.location.reload();
+      }, 2000); // 2000 milissegundos (2 segundos)
+  }
   return (
     <div className="min-h-screen flex flex-col">
       <div className="h-32 bg-gradient-to-b from-white via-blue-100 to-indigo-200 " />

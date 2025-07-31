@@ -4,9 +4,9 @@ import { NextRequest, NextResponse } from 'next/server'
 
 export async function GET(request: NextRequest) {
   const { searchParams } = request.nextUrl;
-
   const userId = searchParams.get('userId');
   const dtParam = searchParams.get('date');
+  
 
   if (!userId || userId === "null" || !dtParam || dtParam === "null") {
     return NextResponse.json({
@@ -20,7 +20,6 @@ export async function GET(request: NextRequest) {
     const [ year, month, day ] = dtParam.split("-").map(Number);
     const gteDate = new Date(Date.UTC(year, month -1, day, 0, 0, 0));
     const lteDate = new Date(Date.UTC(year, month -1, day, 23, 59, 59, 999));
-
     const user = await prisma.user.findFirst({
       where: {
         id: userId
@@ -47,16 +46,21 @@ export async function GET(request: NextRequest) {
         service: true
       }
     })
+    const weekDayIndex: string = `${gteDate.getUTCDay()}`;
+    const userTimesFiltered = user.times
+    .filter(time => time.startsWith(`${weekDayIndex}-`))
+    .map(time => time.replace(`${weekDayIndex}-`, ''));
 
     const blockedSlots = new Set<string>();
 
     for (const apt of appointments){
       const requiredSlots = Math.ceil(apt.service.duration / 30);
-      const startIndex = user.times.indexOf(apt.time)
+      
+      const startIndex = userTimesFiltered.indexOf(apt.time)
 
       if (startIndex !== -1){
         for ( let i=0; i < requiredSlots; i++ ){
-          const blockedSlot = user.times[startIndex + i];
+          const blockedSlot = userTimesFiltered[startIndex + i];
           if(blockedSlot){
             blockedSlots.add(blockedSlot);
           }
@@ -66,7 +70,7 @@ export async function GET(request: NextRequest) {
 
     const blockedTimes = Array.from(blockedSlots);
 
-    // console.log("Horários bloqueados_p1: ", blockedTimes);
+    //console.log("Horários bloqueados_p1: ", blockedTimes);
 
     return NextResponse.json(blockedTimes);
 

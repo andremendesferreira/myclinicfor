@@ -41,6 +41,7 @@ export function isSlotSequenceAvailable(
   blockedSlots: string[] //> Horarios bloqueados
 ) {
 
+  console.log(`teste`, blockedSlots)
   const startIndex = allSlots.indexOf(startSlot)
   if (startIndex === -1 || startIndex + requiredSlots > allSlots.length) {
     return false;

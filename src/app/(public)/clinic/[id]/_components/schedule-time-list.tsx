@@ -26,23 +26,36 @@ export function ScheduleTimeList({
 }: ScheduleTimeListProps) {
   
   const dateIsToday = isToday(selectedDate);
+  // console.log(`teste sequenceOK `, availableTimeSlots);
+
+  const weekDayIndex: string = `${selectedDate.getUTCDay()}`;
   
+  const clinicTimesFiltered = clinicTimes
+  .filter(time => time.startsWith(`${weekDayIndex}-`))
+  .map(time => time.replace(`${weekDayIndex}-`, ''));
+
+  // Filtrando e modificando o availableTimeSlots
+
   return (
+
     <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
       {availableTimeSlots.map((slot) => {
 
+        //console.log('testes: ', slot.time ,requiredSlots,clinicTimesFiltered,blockedTimes)
         const sequenceOk = isSlotSequenceAvailable(
           slot.time,
           requiredSlots,
-          clinicTimes,
+          clinicTimesFiltered,
           blockedTimes
         )
 
         // console.log('verify_slot: ',slot.time)
 
         const slotIsPast = dateIsToday && isSlotInThePast(slot.time);
-
+        
+        //console.log('é hoje:', dateIsToday, 'passou o horário', isSlotInThePast(slot.time));
         const slotEnabled = slot.available && sequenceOk && !slotIsPast;
+        //console.log('slotEnabled:', slot.available, 'sequenceOk', sequenceOk, 'passou horario:', !slotIsPast );
 
         return (
           <Button
