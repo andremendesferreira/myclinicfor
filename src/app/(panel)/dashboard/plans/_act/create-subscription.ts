@@ -80,7 +80,7 @@ export async function handleBilling(planId: string, {types}: PlanProps ) {
                         type: "success",
                         message: "Plano gratuito ativado com sucesso."
                     }
-                    console.log("Usuário atualizado para plano gratuito.");
+                    //console.log("Usuário atualizado para plano gratuito.");
 
                     revalidatePath("/dashboard/plans");
                     
@@ -92,7 +92,7 @@ export async function handleBilling(planId: string, {types}: PlanProps ) {
                         type: "info",
                         message: "Você já está no plano gratuito."
                     }
-                    console.log("Usuário já está no plano gratuito.");
+                    //console.log("Usuário já está no plano gratuito.");
                     return data;
                 }
 

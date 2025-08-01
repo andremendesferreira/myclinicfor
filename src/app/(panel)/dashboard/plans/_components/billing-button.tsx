@@ -29,7 +29,7 @@ export function BillingButton({ planId, className, textBtn, type, disabled }: Bi
     async function handleClick(planId: string, type: PlanProps) {
         const response: BillingResponse = await handleBilling(planId, type);
 
-        console.log(response);
+        //console.log(response);
         if (response.type === "success" && response.sessionId) {
             const stripeJs = await getStripeJs();
             stripeJs.redirectToCheckout({ sessionId: response.sessionId });

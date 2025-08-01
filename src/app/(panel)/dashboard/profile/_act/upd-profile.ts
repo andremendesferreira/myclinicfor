@@ -12,6 +12,7 @@ const formSchema = z.object({
   status: z.boolean(),
   timeZone: z.string(),
   times: z.array(z.string()),
+  activities: z.array(z.string()),
 })
 
 type FormSchema = z.infer<typeof formSchema>
@@ -47,7 +48,8 @@ export async function updateProfile(formData: FormSchema){
                 phone: formData.phone,
                 status: formData.status,
                 timeZone: formData.timeZone,
-                times:  formData.times || []
+                times:  formData.times || [],
+                activities: formData.activities || []
             }
         })
 

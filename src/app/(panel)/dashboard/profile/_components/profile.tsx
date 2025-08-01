@@ -35,6 +35,7 @@ import {
   TabsList,
   TabsTrigger,
 } from '@/components/ui/tabs'
+import { Checkbox } from '@/components/ui/checkbox'
 
 import { Button } from '@/components/ui/button'
 import { ArrowRight, UserRoundCog } from 'lucide-react'
@@ -46,6 +47,7 @@ import { updateProfile } from '../_act/upd-profile'
 import { msgSuccess, msgError, msgWarning, msgInfo } from '@/components/custom-toast'
 import { formatPhone, extractFormatPhone } from '@/app/utils/formatPhone';
 
+
 type UserWithSubscription = Prisma.UserGetPayload<{
   include: {
     subscription: true
@@ -54,18 +56,24 @@ type UserWithSubscription = Prisma.UserGetPayload<{
 
 interface ProfileContentProps {
   user: UserWithSubscription;
+  activities: string[]
 }
 
-export function ProfileContent({ user }: ProfileContentProps) {
+
+
+export function ProfileContent({ user, activities }: ProfileContentProps,) {
   const [selectedHours, setSelectedHours] = useState<string[]>(user.times ?? [])
+  const [selectedActivities, setSelectedActivities] = useState<string[]>(user.activities ?? [])
   const [dialogIsOpen, setDialogIsOpen] = useState(false);
 
+  //console.log(activities);
   const form = useProfileForm({
     name: user.name,
     address: user.address,
     phone: formatPhone(user.phone || ''),
     status: user.status,
-    timeZone: user.timeZone
+    timeZone: user.timeZone,
+    activities: user.activities || []
   });
 
   // Dias da semana com seus respectivos identificadores
@@ -81,8 +89,8 @@ export function ProfileContent({ user }: ProfileContentProps) {
 
   function generateTimeSlots(): string[] {
     const hours: string[] = [];
-    const v_i = 6;
-    const l = 20;
+    const v_i = 0;
+    const l = 24;
 
     for (let i = v_i; i <= l; i++) {
       for (let j = 0; j < 2; j++) {
@@ -111,6 +119,17 @@ export function ProfileContent({ user }: ProfileContentProps) {
         return prev.filter(h => h !== timeSlot)
       } else {
         return [...prev, timeSlot].sort()
+      }
+    })
+  }
+
+  // Função para toggle de activities
+  function toggleActivity(activityName: string) {
+    setSelectedActivities((prev) => {
+      if (prev.includes(activityName)) {
+        return prev.filter(a => a !== activityName)
+      } else {
+        return [...prev, activityName].sort()
       }
     })
   }
@@ -147,7 +166,8 @@ export function ProfileContent({ user }: ProfileContentProps) {
         phone: extractFormatPhone(values.phone ?? '') || '',
         status: values.status === 'active' ? true : false,
         timeZone: values.timeZone,
-        times: selectedHours || []
+        times: selectedHours || [],
+        activities: selectedActivities || []
       })
 
       if (response.error) {
@@ -281,6 +301,43 @@ export function ProfileContent({ user }: ProfileContentProps) {
                   )}
                 />
 
+                {/* Campo de Atividades */}
+                <div className='space-y-2'>
+                  <Label className='font-semibold'>
+                    Atividades da clínica
+                  </Label>
+                  <Card className="p-4">
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-3'>
+                      {activities.map((activity) => (
+                        <div key={activity} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`activity-${activity}`}
+                            checked={selectedActivities.includes(activity)}
+                            onCheckedChange={() => toggleActivity(activity)}
+                          />
+                          <label
+                            htmlFor={`activity-${activity}`}
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                          >
+                            {activity}
+                          </label>
+                        </div>
+                      ))}
+                    </div>
+                    
+                    {selectedActivities.length > 0 && (
+                      <div className="mt-4 p-3 bg-emerald-50 rounded-md border border-emerald-200">
+                        <p className="text-sm font-medium text-emerald-700">
+                          Atividades selecionadas ({selectedActivities.length}):
+                        </p>
+                        <p className="text-sm text-emerald-600 mt-1">
+                          {selectedActivities.join(' • ')}
+                        </p>
+                      </div>
+                    )}
+                  </Card>
+                </div>
+
                 <div className='space-y-2'>
                   <Label className='font-semibold'>
                     Configurar horários da clinica
@@ -314,21 +371,19 @@ export function ProfileContent({ user }: ProfileContentProps) {
                         {weekDays.map((day) => (
                           <TabsContent key={day.id} value={day.id.toString()}>
                             <Card>
-                              <CardHeader>
-                                <CardTitle className="text-lg">{day.name}</CardTitle>
-                                <CardDescription>
-                                  Horários selecionados: {getSelectedHoursForDay(day.id).length} 
-                                  {getSelectedHoursForDay(day.id).length > 0 && 
-                                    ` (${getSelectedHoursForDay(day.id).join(', ')})`
-                                  }
+                              <CardHeader className="pb-0! mb-0!">
+                                <CardTitle className="text-lg">
+                                  {day.name}
+                                </CardTitle>
+                                <CardDescription className="text-sm pb-0! mb-0!">
+                                  <span className="text-sm text-zinc-500">Segmento de tempo 30 minutos.</span>
+                                  <p className='text-sm text-muted-foreground mb-0! pb-0!'>
+                                    Clique nos horários abaixo para marcar ou desmarcar:
+                                  </p>
                                 </CardDescription>
                               </CardHeader>
-                              <CardContent>
-                                <p className='text-sm text-muted-foreground mb-3'>
-                                  Clique nos horários abaixo para marcar ou desmarcar:
-                                </p>
-
-                                <div className='grid grid-cols-5 gap-2'>
+                              <CardContent className="mt-0! pt-0!">
+                                <div className='mt-0! pt-0! grid grid-cols-5 gap-2'>
                                   {hours.map((hour) => (
                                     <Button
                                       key={hour}
@@ -346,7 +401,7 @@ export function ProfileContent({ user }: ProfileContentProps) {
                                 </div>
 
                                 {getSelectedHoursForDay(day.id).length > 0 && (
-                                  <div className="mt-4 p-3 bg-gray-50 rounded-md">
+                                  <div className="mt-4 p-3 bg-gray-50 rounded-md border-emerald-600 border-2">
                                     <p className="text-sm font-medium text-gray-700">
                                       Horários selecionados para {day.name}:
                                     </p>

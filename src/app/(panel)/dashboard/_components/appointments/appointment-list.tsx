@@ -147,11 +147,15 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
       <Card className="pt-3 gap-3">
         <CardHeader className="flex flex-row items-center justify-between pl-6 pr-6 pb-0! mb-0!">
-          <CardTitle className="flex flex-row items-center justify-normal text-lg md:text-xl font-semibold">
-            <span className="pt-6 text-3xl md:text-2xl lg:text-lg">Agendamentos</span>
-            <CalendarClock className="lg:w-6 lg:h-6 md:w-8 md:h-8 w-10 h-10 text-emerald-600" />
-          </CardTitle>
-          <ButtonPickerAppointment className="mt-4" />
+        <CardTitle className="text-lg md:text-xl font-semibold w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full">
+            <div className="flex items-center ">
+              <span className="pt-6 text-3xl md:text-2xl lg:text-lg">Agendamentos</span>
+              <CalendarClock className="lg:w-6 lg:h-6 md:w-8 md:h-8 w-10 h-10 text-emerald-600 ml-2" />
+            </div>
+              <ButtonPickerAppointment  className=" xl:ml-16 xl:mt-4 lg:ml-16 lg:mt-4 md:ml-2 md:mt-4 sm:ml-0 sm:mt-1"/>
+          </div>
+        </CardTitle>
         </CardHeader>
         <CardContent className="m-0">  
           <ScrollArea className="h-[404px] lg:h-[504px] xl:h-[664px] lg:max-h-[calc(100vh-15rem)] pr-3 w-full flex-1">
@@ -173,7 +177,7 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
                   .map(time => time.replace(`${weekDayIndex}-`, ''));                  
 
                   return timesFiltered.map((slot) => {
-                    console.log(slot)
+                    // console.log(slot) verifição do conteúdo do slot.
                     const occupant = occupantMap[slot];
                     
                     if (occupant) {
@@ -190,7 +194,7 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
                       const totalSlotsUsed = Math.ceil(occupant.service.duration / 30);
                       const currentSlotCount = slotCounters[occupant.id];
                       
-                      console.log(`Agendamento ${occupant.id}: slot ${currentSlotCount} de ${totalSlotsUsed}`);
+                      // console.log(`Agendamento ${occupant.id}: slot ${currentSlotCount} de ${totalSlotsUsed}`); Detalhamento do agendamento
                       
                       if (showDetails) {
                         return (

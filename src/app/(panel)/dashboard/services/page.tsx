@@ -24,7 +24,7 @@ export default async function Services(){
           <LifeLine color="#3191cc" size="medium" text="" textColor="" />
         </div>
       }>
-          <ContentServices userId={session.user?.id} />
+          <ContentServices userId={session.user?.id} name={session.user?.name} />
       </Suspense>
   );
 }
