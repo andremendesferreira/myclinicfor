@@ -8,4 +8,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     adapter: PrismaAdapter(prisma) as Adapter,
     trustHost: true,
     providers:[GitHub],
+    callbacks: {
+        async redirect({ url, baseUrl }) {
+            // Garante redirecionamento para o domínio correto
+            if (url.startsWith("/")) return `${baseUrl}${url}`;
+            else if (new URL(url).origin === baseUrl) return url;
+            return baseUrl;
+        }
+    }
 })
