@@ -68,6 +68,7 @@ export function ReminderContent({ closeDialog }: ReminderContentProps) {
 
           <Button
             type="submit"
+            className="cursor-pointer"
             disabled={!form.watch("description")}
           >
             Cadastrar lembrete

@@ -56,7 +56,7 @@ export function ReminderList({reminder}: ReminderListProps){
                     </CardTitle>
                     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                         <DialogTrigger asChild>
-                            <Button variant="ghost" className="w-9 p-0">
+                            <Button variant="ghost" className="w-9 p-0 bg-emerald-600 hover:bg-emerald-500 shadow-emerald-200 hover:shadow-md text-white hover:text-white cursor-pointer">
                                 <Plus className="w-5 h-5" />
                             </Button>
                         </DialogTrigger>
@@ -82,14 +82,16 @@ export function ReminderList({reminder}: ReminderListProps){
                                 className="flex flex-wrap flex-row items-center justify-between py-2 
                                         bg-amber-100 mb-2 px-2 rounded-md"
                             >
-                                <p className="text-sm md:text-base">{item.description}</p>
-                                <Button
-                                    className="w-6 h-6 p-2 rounded-full bg-red-600 shadow-red-950 shadow-sm hover:bg-red-500 hover:shadown-none!"
-                                    size="icon"
-                                    onClick={() => handleDeleteReminder(item.id)}
-                                >
-                                    <Trash className="p-0! m-0! w-4! h-4! text-white"/>
-                                </Button>
+                                <div className='flex items-center justify-between w-full'>
+                                    <p className="text-sm md:text-base">{item.description}</p>
+                                    <Button
+                                        className="w-6 h-6 p-2 rounded-full bg-red-600 shadow-red-950 shadow-sm hover:bg-red-500 hover:shadown-none! cursor-pointer"
+                                        size="icon"
+                                        onClick={() => handleDeleteReminder(item.id)}
+                                    >
+                                        <Trash className="p-0! m-0! w-4! h-4! text-white"/>
+                                    </Button>
+                                </div>
                             </article>
                         ))}
                     </ScrollArea>

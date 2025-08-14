@@ -22,7 +22,7 @@ export type PlansProps = {
 export const PLANS: PlansProps = {
   FREE: {
     name: "Grátis",
-    maxServices: 1,
+    maxServices: 2,
     menuLayout: 0,
     description: {
         title: "Plano Gratuito",

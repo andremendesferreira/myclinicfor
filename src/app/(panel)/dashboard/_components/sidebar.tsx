@@ -50,7 +50,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
               </span>
           )}
                 <Button
-                className='bg-gray-100 hover:bg-gray-50 text-zinc-900 self-end mb-2'
+                className='bg-gray-100 hover:bg-gray-50 text-zinc-900 self-end mb-2 cursor-pointer'
                 onClick={() => setIsCollapsed(!isCollapsed)}
                 >
                 {!isCollapsed ? <ChevronLeft className='w-12 h-12' /> : <ChevronRight className='w-12 h-12' />}
@@ -173,7 +173,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
             <div className='flex items-center gap-4'>
               <SheetTrigger asChild>
                 <Button
-                  variant="outline" size="icon" className='md:hidden bg-white hover:bg-blue-50 text-zinc-900'
+                  variant="outline" size="icon" className='md:hidden bg-white hover:bg-blue-50 text-zinc-900 cursor-pointer'
                   onClick={() => setIsCollapsed(false)}
                 >
                   <Menu className='w-5 h-5' />
@@ -285,7 +285,7 @@ export function SidebarDashboard({ children }: { children: React.ReactNode }) {
           variant="ghost"
           size="lg"
           onClick={ async () => { await LogOutSystem() }}
-          className="w-full h-full gap-2 px-3 py-2 rounded-md transition-colors text-gray-700 hover:bg-white hover:text-blue-800"
+          className="w-full h-full gap-2 px-3 py-2 rounded-md transition-colors text-gray-700 hover:bg-white hover:text-blue-800 cursor-pointer"
         >
           <div className='flex items-center rounded-md w-full h-full p-0 m-0'>
             <span className='w-6 h-6 mr-2'><DoorOpen className="!w-6 !h-6" /></span>

@@ -11,12 +11,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDes
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { formatPhone } from '@/app/utils/formatPhone'
+import { formatCPF, extractFormatCPF } from '@/app/utils/formatCPF'
 import { DateTimePicker } from "./date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScheduleTimeList } from './schedule-time-list'
 import { msgError, msgInfo, msgSuccess, msgWarning } from '@/components/custom-toast'
 import { createNewAppointment } from '../_act/create-appointment'
 import { useRouter } from 'next/navigation'
+import { capitalizeProperNames } from "@/app/utils/formatName";
 
 
 type UserWithServiceAndSubscription = Prisma.UserGetPayload<{
@@ -142,6 +144,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
     const response = await createNewAppointment({
       name: formData.name,
       email: formData.email,
+      cpf: extractFormatCPF(formData.cpf),
       phone: formData.phone,
       date: formData.date,
       clinicId: clinic.id,
@@ -186,7 +189,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
             </div>
 
             <h1 className="text-2xl font-bold mb-2">
-              {clinic.name}
+              {capitalizeProperNames(clinic.name || '')}
             </h1>
             <div className="flex items-center gap-1">
               <MapPin className="w-5 h-5" />
@@ -237,6 +240,28 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                       id="email"
                       placeholder="Digite seu email..."
                       {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="cpf"
+              render={({ field }) => (
+                <FormItem className="my-2">
+                  <FormLabel className="font-semibold">CPF:</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      id="cpf"
+                      placeholder="999.999.999-99"
+                      onChange={(e) => {
+                        const formattedValue = formatCPF(e.target.value)
+                        field.onChange(formattedValue)
+                      }}
                     />
                   </FormControl>
                   <FormMessage />

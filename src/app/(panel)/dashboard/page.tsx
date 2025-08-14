@@ -38,7 +38,7 @@ export default async function Dashboard(){
             target='_blank'
           >
             <ButtonTooltipCustom 
-              className='bg-emerald-600 hover:bg-emerald-500 flex-1 md:flex[0]'
+              className='bg-emerald-600 hover:bg-emerald-500 flex-1 md:flex[0] cursor-pointer'
               icon={<CalendarArrowUp className="w-5! h-5!"/>}
               textButtonInner="Novo agendamento"
               tooltipMsg="Abrir página de agendamento em nova guia."

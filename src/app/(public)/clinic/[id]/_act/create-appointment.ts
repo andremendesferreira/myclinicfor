@@ -2,11 +2,20 @@
 
 import prisma from '@/lib/prisma'
 import { z } from 'zod'
+import { validateCPF } from '@/app/utils/formatCPF' 
 
 const formSchema = z.object({
   name: z.string().min(1, "O nome é obrigatório"),
   email: z.string().email("O email é obrigatório"),
   phone: z.string().min(1, "O telefone é obrigatório"),
+    cpf: z.string()
+    .min(1, "O CPF é obrigatório")
+    .refine((cpf) => {
+      // Remove formatação e verifica se tem pelo menos 11 dígitos
+      const cleanCpf = cpf.replace(/\D/g, '');
+      return cleanCpf.length === 11;
+    }, "CPF deve ter 11 dígitos")
+    .refine((cpf) => validateCPF(cpf), "CPF inválido"),
   date: z.date(),
   serviceId: z.string().min(1, "O serviço é obrigatório"),
   time: z.string().min(1, "O horário é obrigatório"),
@@ -38,6 +47,7 @@ export async function createNewAppointment(formData: FormSchema) {
     const Data =  {
         name: formData.name,
         email: formData.email,
+        cpf: formData.cpf,
         phone: formData.phone,
         time: formData.time,
         appointmentDate: appointmentDate,

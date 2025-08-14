@@ -110,8 +110,8 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                         )}
                         {!permission.hasPermission && (
                             <Link href="/dashboard/plans" className="text-red-400 font-semibold text-base flex flex-row items-center justify-between">
-                                <Lock className="w-5 h-5 text-red-500 mr-2" type="icon"/>
-                                <span>Limite de serviços ativo atingido.</span>
+                                <Lock className="w-4 h-4 lg:w-6 lg:h-6 text-red-500 mr-2" type="icon"/>
+                                <span className="text-sm lg:text-lg break-words">Limite de serviços ativos atingido.</span>
                             </Link>
                         )}
                         <DialogContent

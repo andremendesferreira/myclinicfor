@@ -16,7 +16,7 @@ type PlansProps = {
 
 const PLAN_CONTROL : PlansProps = {
      FREE: {
-        maxServices: 1,
+        maxServices: 2,
         menuLayout: 0,
     },
     BASIC: {

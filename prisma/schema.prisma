@@ -21,6 +21,7 @@ model Appointment {
   phone           String
   appointmentDate DateTime // Data do agendamento
   time            String // horário escolhido
+  cpf             String @default("") // CPF do paciente
 
   serviceId String // id do serviço agendado
   service   Service @relation(fields: [serviceId], references: [id])

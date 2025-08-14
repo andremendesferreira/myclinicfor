@@ -1,7 +1,7 @@
 import getSesion from '@/lib/getSession'
 import { redirect } from 'next/navigation'
 import { getUserData } from './_dta/get_info_user'
-import { ProfileContent } from './_components/profile'
+import { ProfileContent } from './_components/profile-component'
 import { Suspense } from "react";
 import { LifeLine } from "react-loading-indicators";
 import { getActivitiesData } from './_dta/get_activities';
