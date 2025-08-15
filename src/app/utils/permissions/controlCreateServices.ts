@@ -38,7 +38,7 @@ export async function controlCreateServices(subscription: Subscription | null, s
             const plan = subscription.plan;
             const planLmt = await getPlan(plan);
 
-            console.log("Limites do plano", planLmt);
+            //console.log("Limites do plano", planLmt);
 
             let verifyService: boolean;
             let available: number = 0;

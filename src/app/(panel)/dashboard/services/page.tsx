@@ -4,6 +4,8 @@ import { getUserData } from "../profile/_dta/get_info_user";
 import { ContentServices } from "./_components/content-services";
 import { Suspense } from "react";
 import { LifeLine } from "react-loading-indicators";
+import { LabelSubscription } from "@/components/ui/label-subscription";
+import { verifyPermission } from "@/app/utils/permissions/verify-permission";
 
 export default async function Services(){
   const session = await getSession();
@@ -13,6 +15,7 @@ export default async function Services(){
     }
 
   const user = await getUserData({ userId: session.user?.id })
+  const permission = await verifyPermission({ type: "service" }) ;
 
   if (!user) {
     redirect("/")
@@ -24,6 +27,9 @@ export default async function Services(){
           <LifeLine color="#3191cc" size="medium" text="" textColor="" />
         </div>
       }>
+          {!permission.hasPermission && (
+            <LabelSubscription expired={true} />  
+          )}
           <ContentServices userId={session.user?.id} name={session.user?.name} />
       </Suspense>
   );

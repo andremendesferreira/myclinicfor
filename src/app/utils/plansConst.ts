@@ -28,7 +28,7 @@ export const PLANS: PlansProps = {
         title: "Plano Gratuito",
         text: "Ideal para quem está começando.",
         features: [
-            "Limite de serviço ativo 1",
+            "Limite de serviço ativo 2",
             "Limite cadastro de serviço 5",
             "Agendamento de consultas",
             "Página de agendamento",

@@ -54,10 +54,61 @@ model Service {
   userId String
   user   User   @relation(fields: [userId], references: [id])
 
-  appointment Appointment[]
+  appointment   Appointment[]
+  consultations Consultation[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+// Tabela de pacientes
+model Patient {
+  id          String   @id @default(uuid())
+  nome        String
+  cpf         String   @unique
+  telefone    String
+  email       String   @unique
+  userId      String
+  status      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  
+  // Relacionamentos
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  consultations Consultation[]
+  
+  // Índices para melhorar performance
+  @@index([userId])
+  @@index([cpf])
+  @@map("patients")
+}
+
+// Tabela de consultas
+model Consultation {
+  id             String   @id @default(uuid())
+  patientId      String
+  userId         String
+  serviceId      String
+  anamnese       String?  @db.Text // Campo texto longo para anamnese
+  familyHistory  String?  @db.Text // Histórico familiar - campo texto longo
+  imageGallery   Bytes[]  @default([]) // Array de bytes para imagens
+  status         String   @default("scheduled") // scheduled, completed, cancelled
+  consultationDate DateTime? // Data da consulta
+  observations   String?  @db.Text // Campo adicional para observações
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  // Relacionamentos
+  patient    Patient @relation(fields: [patientId], references: [id], onDelete: Cascade)
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  service    Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  
+  // Índices para melhorar performance
+  @@index([patientId])
+  @@index([userId])
+  @@index([serviceId])
+  @@index([consultationDate])
+  @@map("consultations")
 }
 
 enum Plan {
@@ -101,10 +152,12 @@ model User {
   stripe_customer_id String?
   times              String[]  @default([])
 
-  subscription Subscription?
-  services     Service[]
-  reminders    Reminder[]
-  appointments Appointment[]
+  subscription  Subscription?
+  services      Service[]
+  reminders     Reminder[]
+  appointments  Appointment[]
+  patients      Patient[]      // Nova relação
+  consultations Consultation[] // Nova relação
 
   // Um usuário pode ter diversas atividades
   activities     String[] @default([]) 

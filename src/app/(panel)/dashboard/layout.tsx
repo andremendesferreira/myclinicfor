@@ -1,4 +1,4 @@
-import { SidebarDashboard } from "./_components/sidebar";
+import { SidebarDashboard } from "./_components/sidebar/SidebarDashboard";
 export default function DashboardLayout({
   children, // will be a page or nested layout
 }: {

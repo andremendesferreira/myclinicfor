@@ -7,6 +7,7 @@ import { getSubscription } from '../_dta/get-subscription';
 import { GridPlans } from './_components/grip-plans';
 import { Banknote } from "lucide-react";
 import { Plan } from "@/generated/prisma";
+import { verifyPermission } from "@/app/utils/permissions/verify-permission";
 
 export default async function Plans(){
 
@@ -17,8 +18,15 @@ export default async function Plans(){
   }
 
   const subscription = await getSubscription({ userId: session.user?.id })
-  const actualPlan: Plan | undefined = Array.isArray(subscription) ? undefined : subscription?.plan;
-  
+  const permission = await verifyPermission({ type: "service" });
+  let actualPlan: Plan | undefined;  
+
+  if (permission.expired){
+    actualPlan = undefined;
+  } else {
+    actualPlan = Array.isArray(subscription) ? undefined : subscription?.plan;
+  }
+
   return (
     <Suspense fallback={
       <div className="flex items-center justify-center h-[404px] lg:h-[504px] xl:h-[664px] lg:max-h-[calc(100vh-15rem)] pr-3 w-full flex-1">
