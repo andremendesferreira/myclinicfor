@@ -126,18 +126,26 @@ export async function manageSubscription(
                 if (!findSubscription) return;
                 
                 await prisma.subscription.update({
-                where: {
-                    userId: findUser.id
-                },
-                data: {
-                    status: 'Downgrade',
-                    priceId: 'free-plan',
-                    plan: "FREE",
-                }
+                    where: {
+                        userId: findUser.id
+                    },
+                    data: {
+                        status: 'Downgrade',
+                        priceId: 'free-plan',
+                        plan: "FREE",
+                        }
+                }); 
 
-            });
-
-            return;
+                await prisma.service.updateMany({
+                    where: {
+                        userId: findUser.id
+                    },
+                    data: {
+                        status: false
+                    }
+                });
+                
+                return;
 
             }catch(err){
                 console.log("FALHA AO DELETAR ASSINATURA NO BANCO")

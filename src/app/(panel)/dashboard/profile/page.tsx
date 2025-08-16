@@ -5,7 +5,8 @@ import { ProfileContent } from './_components/profile-component'
 import { Suspense } from "react";
 import { LifeLine } from "react-loading-indicators";
 import { getActivitiesData } from './_dta/get_activities';
-
+import { verifyPermission } from "@/app/utils/permissions/verify-permission";
+import { LabelSubscription } from "@/components/label-subscription";
 
 interface ActivitiesProps {
   activities: string[]; // Array de Activities
@@ -19,6 +20,7 @@ export default async function Profile() {
   }
 
   const user = await getUserData({ userId: session.user?.id })
+  const permission:any = await verifyPermission({ type: "service" }) ;
 
   if (!user) {
     redirect("/")
@@ -36,6 +38,13 @@ export default async function Profile() {
         <LifeLine color="#3191cc" size="medium" text="" textColor="" />
       </div>
     }>
+      {!permission.hasPermission && (
+        <LabelSubscription 
+          expired={permission.expired} 
+          planName={permission?.plan?.name}
+          limitType="appointments" // ou outro tipo baseado no contexto
+        />
+      )}
       <ProfileContent user={user} activities={activities}/>
     </Suspense>
   )

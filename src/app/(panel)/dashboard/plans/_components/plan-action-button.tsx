@@ -34,7 +34,7 @@ export function PlanActionButton({ actualPlan, customization, onPlanAction }: Pl
         variant="destructive"
         className={`w-full py-2 px-4 rounded-md transition-colors ${customization.buttonClass}`}
       >
-        Downgrade
+        Cancelar
       </Button>
     );
   }

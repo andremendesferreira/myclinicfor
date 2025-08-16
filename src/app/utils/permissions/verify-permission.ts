@@ -49,7 +49,7 @@ export async function verifyPermission({ type }: VerifyPermissionProps): Promise
         case "service": 
 
             const permission = await controlCreateServices(subscription, session);
-            console.log(permission)
+            //console.log(permission)
 
             return permission;
 

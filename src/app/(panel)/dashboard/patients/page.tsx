@@ -1,44 +1,60 @@
-import getSession from "@/lib/getSession";
+import { Suspense } from "react"
+import { LifeLine } from "react-loading-indicators"
+import getSession from "@/lib/getSession"
 import { redirect } from "next/navigation"
-import { getUserData } from "../profile/_dta/get_info_user";
-import Link from "next/link";
-import { Suspense } from "react";
-import { LifeLine } from "react-loading-indicators";
-import { LabelSubscription } from "@/components/ui/label-subscription";
-import { verifyPermission } from "@/app/utils/permissions/verify-permission";
+import { verifyPermission } from "@/app/utils/permissions/verify-permission"
+import { LabelSubscription } from "@/components/label-subscription"
+import { PatientsHeader } from "./_components/patients-header"
+import { PatientsList } from "./_components/patients-list"
+import { PatientsStats } from "./_components/patients-stats"
+import { getPatients } from "./_dta/get-patients"
 
-export default async function Dashboard(){
-  const session = await getSession();
+export default async function PatientsPage() {
+  const session = await getSession()
 
-    if(!session){
-      redirect("/");
-    }
-
-  const user = await getUserData({ userId: session.user?.id })
-  const permission = await verifyPermission({ type: "service" });
-
-  if (!user) {
+  if (!session) {
     redirect("/")
   }
 
-  const urlLink = `${process.env.NEXT_PUBLIC_URL}/clinic/${user.id}`
+  const permission: any = await verifyPermission({ type: "service" })
 
   return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center h-[404px] lg:h-[504px] xl:h-[664px] lg:max-h-[calc(100vh-15rem)] pr-3 w-full flex-1">
-        <LifeLine color="#3191cc" size="medium" text="" textColor="" />
-        <div className="flex flex-row items-center justify-between w-full">
-          {!permission.hasPermission && (
-            <LabelSubscription expired={permission.expired} />
-          )}
+    <main className="space-y-6">
+      {/* Alerta de permissão */}
+      {!permission.hasPermission && (
+        <LabelSubscription 
+          expired={permission.expired} 
+          planName={permission?.plan?.name}
+          limitType="patients"
+        />
+      )}
+
+      {/* Header da página */}
+      <PatientsHeader hasPermission={permission.hasPermission} />
+
+      {/* Estatísticas */}
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-32">
+          <LifeLine color="#3191cc" size="medium" text="" textColor="" />
         </div>
-      </div>
-    }>
-      <main>
-        <section className="grid grid-col-1 gap-4 lg:grid-cols-2 mt-4">
-            <h1 className="text-2xl font-semibold text-gray-800 mb-4">Pacientes</h1>
-        </section>
-      </main>
-    </Suspense>
-  );
+      }>
+        <PatientsStats userId={session.user?.id!} />
+      </Suspense>
+
+      {/* Lista de pacientes */}
+      <Suspense fallback={
+        <div className="flex items-center justify-center h-64">
+          <LifeLine color="#3191cc" size="medium" text="" textColor="" />
+        </div>
+      }>
+        <PatientsListWrapper userId={session.user?.id!} />
+      </Suspense>
+    </main>
+  )
+}
+
+// Wrapper para buscar os dados dos pacientes
+async function PatientsListWrapper({ userId }: { userId: string }) {
+  const patients = await getPatients({ userId })
+  return <PatientsList patients={patients} />
 }

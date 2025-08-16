@@ -15,9 +15,9 @@ export const getButtonText = (currentPlan: Plan, targetPlan: Plan): string => {
   const targetHierarchy = getPlanHierarchy(targetPlan);
   
   if (targetHierarchy > currentHierarchy) {
-    return "Upgrade";
+    return "Melhorar";
   } else if (targetHierarchy < currentHierarchy) {
-    return "Downgrade";
+    return "Diminuir";
   }
   return "Alterar";
 };

@@ -4,7 +4,7 @@ import { getUserData } from "../profile/_dta/get_info_user";
 import Link from "next/link";
 import { Suspense } from "react";
 import { LifeLine } from "react-loading-indicators";
-import { LabelSubscription } from "@/components/ui/label-subscription";
+import { LabelSubscription } from "@/components/label-subscription";
 import { verifyPermission } from "@/app/utils/permissions/verify-permission";
 
 export default async function Dashboard(){

@@ -32,7 +32,7 @@ export const PLANS: PlansProps = {
             "Limite cadastro de serviço 5",
             "Agendamento de consultas",
             "Página de agendamento",
-            "Contato com suporte",
+            "Mensagem informativa via WhatsApp",
             "Atualização para planos pagos disponível"
         ]
     },
@@ -52,8 +52,8 @@ export const PLANS: PlansProps = {
             "Limite cadastro de serviço 10",
             "Agendamento de consultas",
             "Página de agendamento",
-            "Personalização de perfil",
-            "Suporte básico",
+            "Contato com suporte",
+            "Mensagem informativa via WhatsApp",
             "Atualização para planos pagos disponível"
         ]
     },
@@ -76,9 +76,8 @@ export const PLANS: PlansProps = {
             "Registro de consultas",            
             "Personalização de perfil",
             "Gerenciamento de pacientes",                             
-            "Ferramentas de IA",
-            "Relatórios",
-            "Suporte profissional",
+            "Contato com suporte",
+            "Mensagem informativa via WhatsApp",
             "Atualização para planos pagos disponível"
         ]
     },
@@ -102,10 +101,9 @@ export const PLANS: PlansProps = {
             "Personalização de perfil",
             "Gerenciamento de pacientes",                
             "Ferramentas de IA",
-            "Relatórios",
-            "Suporte premium",
+            "Contato com suporte",
+            "Mensagem informativa via WhatsApp",
             "Transcrição de voz em texto",
-            "Atualização e implantação de novas funcionalidades"
         ]
     },
     price: 97.99,
