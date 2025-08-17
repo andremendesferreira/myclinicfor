@@ -46,7 +46,7 @@ export function ServicesList({ services, permission }: ServicesListProps) {
     // Diálogo de autorização de remoção de serviço.
     const [isAuthorizationDialogOpen, setIsAuthorizationDialogOpen] = useState(false);
     
-     const servicesList = permission.hasPermission ? services : services.slice(0, (permission.plan?.maxServices! + 5));
+    const servicesList = permission.hasPermission ? services : services.slice(0, (permission.plan?.maxServices! + 5));
 
     let description:string[] = [];
     let planName: string;
@@ -95,52 +95,60 @@ export function ServicesList({ services, permission }: ServicesListProps) {
             if (!open) setIsEditService(null);
         }}>
             <section  className="mx-auto">
+            {/* Título e botão */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 space-y-4">
+                <div>
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                        Serviços
+                    </h1>
+                    <p className="text-gray-600 mt-1">
+                        Gerencie o cadastro de serviços prestados na clínica.
+                    </p>
+                </div>
+            {permission.hasPermission && (
+                <DialogTrigger asChild>
+                    <Button 
+                        className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                        <Plus className="h-4 w-4 mr-2" />
+                        Novo Serviço
+                    </Button>
+                </DialogTrigger>
+            )}
+            {!permission.hasPermission && (
+                <Link href="/dashboard/plans" className="text-red-400 font-semibold text-base flex flex-row items-center justify-between">
+                    <Lock className="w-4 h-4 lg:w-6 lg:h-6 text-red-500 mr-2" type="icon"/>
+                    <span className="text-sm lg:text-lg break-words">Limite de serviços ativos atingido.</span>
+                </Link>
+            )}
+            <DialogContent
+                onInteractOutside={(e) => {
+                    e.preventDefault();
+                    setIsDialogOpen(false);
+                    setIsEditService(null);
+                }}
+            >
+                <DialogService 
+                    closeModal={() => {
+                        setIsDialogOpen(false);
+                        setIsEditService(null);
+                    }}
+                    serviceId={isEditService ? isEditService.id : undefined}
+                    initialValues={isEditService ? {
+                        name: isEditService.name,
+                        price: (isEditService.price / 100).toFixed(2).replace(".", ","),
+                        hours: Math.floor(isEditService.duration / 60).toString(),
+                        minutes: (isEditService.duration % 60).toString(),
+                    } : undefined}
+                />
+            </DialogContent>
+            </div>
                 <Card >
-                    <CardHeader className="flex flex-row items-center justify-between space-x-0 pb-2">
-                        <CardTitle className="flex flex-row items-center justify-items-start space-x-0 p-0">
-                            <BriefcaseBusiness className="w-10 h-10 mr-4 text-emerald-500" />
-                            <span className='text-3xl text-shadow-md lg:text-2xl'> Serviços</span>
-                        </CardTitle>
-                        {permission.hasPermission && (
-                            <DialogTrigger asChild>
-                                <Button className="bg-emerald-700 text-white hover:bg-emerald-600 hover:shadow-sm hover:shadow-emerald-200">
-                                    <Plus className="w-4 h-4 " />
-                                </Button>
-                            </DialogTrigger>
-                        )}
-                        {!permission.hasPermission && (
-                            <Link href="/dashboard/plans" className="text-red-400 font-semibold text-base flex flex-row items-center justify-between">
-                                <Lock className="w-4 h-4 lg:w-6 lg:h-6 text-red-500 mr-2" type="icon"/>
-                                <span className="text-sm lg:text-lg break-words">Limite de serviços ativos atingido.</span>
-                            </Link>
-                        )}
-                        <DialogContent
-                            onInteractOutside={(e) => {
-                                e.preventDefault();
-                                setIsDialogOpen(false);
-                                setIsEditService(null);
-                            }}
-                        >
-                            <DialogService 
-                                closeModal={() => {
-                                    setIsDialogOpen(false);
-                                    setIsEditService(null);
-                                }}
-                                serviceId={isEditService ? isEditService.id : undefined}
-                                initialValues={isEditService ? {
-                                    name: isEditService.name,
-                                    price: (isEditService.price / 100).toFixed(2).replace(".", ","),
-                                    hours: Math.floor(isEditService.duration / 60).toString(),
-                                    minutes: (isEditService.duration % 60).toString(),
-                                } : undefined}
-                            />
-                        </DialogContent>
-                    </CardHeader>
                     <CardContent>
-                        <section className="space-y-4 ">
+                        <section className="space-y-1 ">
                             <div className="flex items-baseline justify-between max-h-[12px]">
                                 <div>
-                                    <span className="font-bold sm:text-sm md:text-lg lg:text-1xl">Detalhes dos serviços:</span>
+                                    <span className="font-bold sm:text-sm md:text-lg lg:text-1xl">Serviços cadastrados:</span>
                                 </div>
                                 <div className="flex flex-row font-semibold text-sm min-w-[160px]">
                                     <div className="h-4">
@@ -155,7 +163,7 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                                     </div>
                                 </div>
                             </div>
-                            <Separator className="m-3 p-0" />
+                            <Separator className="mt-5 p-0" />
                             {/* ToDo: adicinar carregamento */}
                             {servicesList.map(service => (
                                 <div key={service.id}>
@@ -164,15 +172,15 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                                         <span className="font-semibold break-words overflow-hidden">{service.name}</span>
                                         <span className="font-semibold text-zinc-600">{formatCurrecy(convertCentsToReal(service.price.toString()))}</span>
                                     </div>
-                                        <div className='flex items-end justify-end h-12 w-full'>
-                                                <Separator orientation="vertical" className="mr-1" />
+                                        <div className='flex items-end justify-end h-9 w-full'>
+                                            <Separator orientation="vertical" className="mr-1" />
                                         </div>
                                     <div suppressHydrationWarning={true} className="min-w-[155px]">
                                         <Button
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => { handleSelectService(service) }}
-                                            className="ml-2 mr-1"
+                                            className="ml-2 mr-1 cursor-pointer"
                                         >
                                             <Pencil className="w-4 h-4" />
                                         </Button>
@@ -181,8 +189,7 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                                             variant="ghost"
                                             size="icon"
                                             onClick={() => handleInactiveService(service.id, service.status)}
-                                            className="ml-3 mr-1"
-                                            
+                                            className="ml-3 mr-1 cursor-pointer"
                                             >
                                                 <ToggleRight className="w-4 h-4 text-green-500" />
                                             </Button>
@@ -191,7 +198,7 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => handleInactiveService(service.id, service.status)}
-                                                className="ml-3 mr-1"
+                                                className="ml-3 mr-1 cursor-pointer"
                                                 disabled={!permission.hasPermission}
                                             >
                                                     <ToggleLeft className="w-4 h-4 text-red-600" />
@@ -202,7 +209,7 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                                                 <Button
                                                     variant="ghost"
                                                     size="icon"
-                                                    className="ml-3 mr-1"
+                                                    className="ml-3 mr-1 cursor-pointer"
                                                 >
                                                     <Trash className="w-4 h-4 text-red-700" />
                                                 </Button>
@@ -238,10 +245,9 @@ export function ServicesList({ services, permission }: ServicesListProps) {
                                                 </DialogFooter>
                                             </DialogContent>
                                         </Dialog>
-
                                     </div>
                                 </article>
-                                <Separator className="m-3 p-0" />
+                                <Separator className="ml-1 mr-1 mt-1 p-0" />
                                 </div>
                             ))}
                         </section>

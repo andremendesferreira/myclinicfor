@@ -29,7 +29,7 @@ export default async function Dashboard(){
   const urlLink = `${process.env.NEXT_PUBLIC_URL}/clinic/${user.id}`
 
   return (
-    <main>
+      <div>
       {/* Alerta de permissão - fora do Suspense */}
       {!permission.hasPermission && (
         <LabelSubscription 
@@ -74,6 +74,6 @@ export default async function Dashboard(){
           <Reminders userId={session.user?.id!} />
         </section>
       </Suspense>
-    </main>
+    </div>
   );
 }

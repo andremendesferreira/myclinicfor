@@ -8,12 +8,26 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { createPatient } from "../_act/create-patient"
-import { toast } from "sonner"
+import { msgError, msgSuccess } from "@/components/custom-toast"
+import { formatPhone } from '@/app/utils/formatPhone';
+import { formatCPF, validateCPF } from "@/app/utils/formatCPF"
+import { capitalizeProperNames } from "@/app/utils/formatName"
 
 const createPatientSchema = z.object({
   nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  cpf: z.string().min(11, "CPF deve ter 11 dígitos"),
-  telefone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos"),
+  cpf: z.string()
+    .min(1, "O CPF é obrigatório")
+    .refine((cpf) => {
+      const cleanCpf = cpf.replace(/\D/g, '');
+      return cleanCpf.length === 11;
+    }, "CPF deve ter 11 dígitos")
+    .refine((cpf) => validateCPF(cpf.replace(/\D/g, '')), "CPF inválido"),
+  telefone: z.string().refine(value => {
+    const regex = /^\(\d{2}\) \d{4,5}-\d{4}$/;
+    return regex.test(value);
+  }, {
+    message: "Telefone deve estar no formato (XX) XXXX-XXXX ou (XX) XXXXX-XXXX"
+  }),
   email: z.string().email("Email inválido"),
 })
 
@@ -42,14 +56,14 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
       const result = await createPatient(data)
       
       if (result.success) {
-        toast.success("Paciente cadastrado com sucesso!")
+        msgSuccess("Paciente cadastrado com sucesso!")
         reset()
         onSuccess()
       } else {
-        toast.error(result.error || "Erro ao cadastrar paciente")
+        msgError(result.error || "Erro ao cadastrar paciente")
       }
     } catch (error) {
-      toast.error("Erro inesperado ao cadastrar paciente")
+      msgError("Erro inesperado ao cadastrar paciente")
     } finally {
       setIsLoading(false)
     }
@@ -58,11 +72,16 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div>
-        <Label htmlFor="nome">Nome completo</Label>
+        <Label className="mb-2" htmlFor="nome">Nome completo</Label>
         <Input
           id="nome"
-          {...register("nome")}
           placeholder="Digite o nome completo"
+          {...register("nome", {
+            onChange: (e) => {
+              const formattedValue = capitalizeProperNames(e.target.value);
+              e.target.value = formattedValue;
+            }
+          })}
         />
         {errors.nome && (
           <p className="text-sm text-red-600 mt-1">{errors.nome.message}</p>
@@ -70,11 +89,20 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="cpf">CPF</Label>
+        <Label className="mb-2" htmlFor="cpf">CPF</Label>
         <Input
           id="cpf"
-          {...register("cpf")}
           placeholder="000.000.000-00"
+          {...register("cpf", {
+            pattern: {
+              value: /^\d{3}\.\d{3}\.\d{3}-\d{2}$/,
+              message: "CPF deve estar no formato 000.000.000-00"
+            },
+            onChange: (e) => {
+              const formattedValue = formatCPF(e.target.value);
+              e.target.value = formattedValue;
+            }
+          })}
           maxLength={14}
         />
         {errors.cpf && (
@@ -83,11 +111,20 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="telefone">Telefone</Label>
+        <Label className="mb-2" htmlFor="telefone">Telefone</Label>
         <Input
           id="telefone"
-          {...register("telefone")}
-          placeholder="(00) 00000-0000"
+          placeholder="(99) 99999-9999"
+          {...register("telefone", {
+            pattern: {
+              value: /^\(\d{2}\) \d{4,5}-\d{4}$/,
+              message: "Telefone deve estar no formato (XX) XXXX-XXXX ou (XX) XXXXX-XXXX"
+            },
+            onChange: (e) => {
+              const formattedValue = formatPhone(e.target.value);
+              e.target.value = formattedValue;
+            }
+          })}
         />
         {errors.telefone && (
           <p className="text-sm text-red-600 mt-1">{errors.telefone.message}</p>
@@ -95,7 +132,7 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="email">Email</Label>
+        <Label className="mb-2" htmlFor="email">Email</Label>
         <Input
           id="email"
           type="email"

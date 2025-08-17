@@ -4,10 +4,18 @@ import { z } from "zod"
 import prisma from "@/lib/prisma"
 import getSession from "@/lib/getSession"
 import { revalidatePath } from "next/cache"
+import { validateCPF } from "@/app/utils/formatCPF"
 
 const createPatientSchema = z.object({
   nome: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
-  cpf: z.string().min(11, "CPF deve ter 11 dígitos"),
+  cpf: z.string()
+    .min(1, "O CPF é obrigatório")
+    .refine((cpf) => {
+      // Remove formatação e verifica se tem pelo menos 11 dígitos
+      const cleanCpf = cpf.replace(/\D/g, '');
+      return cleanCpf.length === 11;
+    }, "CPF deve ter 11 dígitos")
+    .refine((cpf) => validateCPF(cpf), "CPF inválido"),
   telefone: z.string().min(10, "Telefone deve ter pelo menos 10 dígitos"),
   email: z.string().email("Email inválido"),
 })

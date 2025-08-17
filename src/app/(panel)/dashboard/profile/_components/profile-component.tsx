@@ -9,9 +9,9 @@ import { updateProfile } from '../_act/upd-profile'
 import { msgSuccess, msgError } from '@/components/custom-toast'
 import { formatPhone, extractFormatPhone } from '@/app/utils/formatPhone'
 import { ProfileContentProps } from '../types/profile.types'
+import { AvatarProfile } from './profile-avatar'
 
 // Componentes refatorados
-import { ProfileImage } from './profile-image'
 import { BasicInfoFields } from './profile-basic-info-fields'
 import { StatusSwitch } from './profile-switch-status'
 import { ActivitiesSelector } from './profile-activities'
@@ -89,6 +89,7 @@ export function ProfileContent({ user, activities }: ProfileContentProps) {
     }
   }
 
+
   return (
     <div className='mx-auto'>
       <Form {...form}>
@@ -100,7 +101,10 @@ export function ProfileContent({ user, activities }: ProfileContentProps) {
             </CardTitle>
             
             <CardContent className='space-y-6'>
-              <ProfileImage imageUrl={user.image} />
+              <AvatarProfile image={{
+                imageUrl: user.image,
+                alt: 'Imagem clinica'
+              }} userId={user.id} />
 
               <div className='space-y-4'>
                 <BasicInfoFields control={form.control} />

@@ -32,7 +32,7 @@ export function PatientsHeader({ hasPermission }: PatientsHeaderProps) {
             Pacientes
           </h1>
           <p className="text-gray-600 mt-1">
-            Gerencie o cadastro dos seus pacientes
+            Gerencie o cadastro de pacientes.
           </p>
         </div>
 
@@ -48,7 +48,7 @@ export function PatientsHeader({ hasPermission }: PatientsHeaderProps) {
           </DialogTrigger>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle>Cadastrar Novo Paciente</DialogTitle>
+              <DialogTitle>Cadastrar de Paciente</DialogTitle>
               <DialogDescription>
                 Preencha os dados do paciente para cadastrá-lo no sistema.
               </DialogDescription>

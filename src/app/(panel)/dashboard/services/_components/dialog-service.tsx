@@ -25,7 +25,7 @@ interface DialogServiceProps {
     price: string;
     hours: string;
     minutes: string;
-  }
+  };
 }
 
 
@@ -33,6 +33,7 @@ export function DialogService({ closeModal, initialValues, serviceId }: DialogSe
 
   const form = useDialogServiceForm({initialValues: initialValues});
   const [loading, setLoading] = useState(false);
+  const isEdit = serviceId ? true : false;
 
   async function onSubmit(values: DialogServiceFormData){
     setLoading(true);
@@ -129,9 +130,11 @@ export function DialogService({ closeModal, initialValues, serviceId }: DialogSe
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Novo Serviço</DialogTitle>
+        <DialogTitle>
+          {isEdit ? 'Editar Serviço' : 'Novo Serviço'}
+        </DialogTitle>
         <DialogDescription>
-          Adicione um novo serviço de atendimento.
+          {isEdit ? 'Edite as informações do serviço.' : 'Adicione um novo serviço de atendimento.' }
         </DialogDescription>
       </DialogHeader>
                                     
