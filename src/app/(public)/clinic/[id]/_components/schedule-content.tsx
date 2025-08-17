@@ -1,13 +1,13 @@
 "use client"
 
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import Image from "next/image"
 import imgTest from '../../../../../../public/prof1.jpg'
-import { CalendarArrowUp, MapPin } from "lucide-react"
+import { CalendarArrowUp, MapPin, ChevronDown, ChevronUp, ExternalLink, Navigation, Loader2 } from "lucide-react"
 import { Prisma } from "@/generated/prisma"
 import { useAppointmentForm, AppointmentFormData } from './schedule-form'
 import { Button } from '@/components/ui/button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { formatPhone } from '@/app/utils/formatPhone'
@@ -15,11 +15,10 @@ import { formatCPF, extractFormatCPF } from '@/app/utils/formatCPF'
 import { DateTimePicker } from "./date-picker"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { ScheduleTimeList } from './schedule-time-list'
-import { msgError, msgInfo, msgSuccess, msgWarning } from '@/components/custom-toast'
+import { msgError, msgInfo, msgSuccess } from '@/components/custom-toast'
 import { createNewAppointment } from '../_act/create-appointment'
 import { useRouter } from 'next/navigation'
-import { capitalizeProperNames } from "@/app/utils/formatName";
-
+import { capitalizeProperNames } from "@/app/utils/formatName"
 
 type UserWithServiceAndSubscription = Prisma.UserGetPayload<{
   include: {
@@ -27,7 +26,6 @@ type UserWithServiceAndSubscription = Prisma.UserGetPayload<{
     services: true,
   }
 }>
-
 
 interface ScheduleContentProps {
   clinic: UserWithServiceAndSubscription
@@ -38,188 +36,336 @@ export interface TimeSlot {
   available: boolean;
 }
 
-export function ScheduleContent({ clinic }: ScheduleContentProps) {
+// Componente separado para o mapa
+const GoogleMapsEmbed = ({ address, isOpen }: { address: string; isOpen: boolean }) => {
+  const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  
+  const embedUrl = useMemo(() => {
+    if (!address || !apiKey) return '';
+    const encodedAddress = encodeURIComponent(address);
+    return `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${encodedAddress}`;
+  }, [address, apiKey]);
 
+  const openGoogleMaps = useCallback(() => {
+    const encodedAddress = encodeURIComponent(address);
+    const url = `https://www.google.com/maps/search/?api=1&query=${encodedAddress}`;
+    window.open(url, '_blank');
+  }, [address]);
+
+  const getDirections = useCallback(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          const encodedAddress = encodeURIComponent(address);
+          const directionsUrl = `https://www.google.com/maps/dir/${latitude},${longitude}/${encodedAddress}`;
+          window.open(directionsUrl, '_blank');
+        },
+        () => openGoogleMaps() // Fallback se geolocalização falhar
+      );
+    } else {
+      openGoogleMaps();
+    }
+  }, [address, openGoogleMaps]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="mt-3 bg-white rounded-lg shadow-lg border">
+      {address ? (
+        <>
+          {/* Google Maps Embed */}
+          <div className="h-64 w-full rounded-t-lg overflow-hidden">
+            {embedUrl ? (
+              <iframe
+                src={embedUrl}
+                width="100%"
+                height="100%"
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="w-full h-full border-0"
+                title={`Mapa de ${address}`}
+              />
+            ) : (
+              <div className="w-full h-full bg-gray-100 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <MapPin className="w-8 h-8 mx-auto mb-2" />
+                  <p className="text-sm">API do Google Maps não configurada</p>
+                  <p className="text-xs">Configure NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</p>
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Botões de ação */}
+          <div className="p-4 border-t bg-gray-50 rounded-b-lg">
+            <div className="flex gap-2 justify-center">
+              <Button
+                onClick={openGoogleMaps}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <ExternalLink className="w-4 h-4" />
+                Abrir no Maps
+              </Button>
+              <Button
+                onClick={getDirections}
+                variant="default"
+                size="sm"
+                className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+              >
+                <Navigation className="w-4 h-4" />
+                Como chegar
+              </Button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="p-4 text-center text-gray-500">
+          Endereço não disponível
+        </div>
+      )}
+    </div>
+  );
+};
+
+// Componente para o accordion do endereço
+const AddressAccordion = ({ clinic }: { clinic: UserWithServiceAndSubscription }) => {
+  const [isMapOpen, setIsMapOpen] = useState(false);
+
+  const toggleMap = useCallback(() => {
+    setIsMapOpen(prev => !prev);
+  }, []);
+
+  const hasAddress = Boolean(clinic.address);
+
+  return (
+    <div className="w-full max-w-md">
+      <button
+        type="button"
+        className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 p-2 rounded-lg transition-colors duration-200 w-full text-left"
+        onClick={toggleMap}
+        disabled={!hasAddress}
+      >
+        <MapPin className="w-5 h-5 text-blue-600" />
+        <span className="flex-1 text-sm text-gray-700">
+          {clinic.address || "Endereço não informado"}
+        </span>
+        {hasAddress && (
+          isMapOpen ? (
+            <ChevronUp className="w-4 h-4 text-gray-500" />
+          ) : (
+            <ChevronDown className="w-4 h-4 text-gray-500" />
+          )
+        )}
+      </button>
+
+      {/* Accordion Content - Google Maps */}
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${
+        isMapOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+      }`}>
+        <GoogleMapsEmbed address={clinic.address || ''} isOpen={isMapOpen} />
+      </div>
+    </div>
+  );
+};
+
+// Hook customizado para gerenciar horários
+const useTimeSlots = (clinic: UserWithServiceAndSubscription, selectedDate: Date | undefined, selectedTime: string) => {
+  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
+  const [blockedTimes, setBlockedTimes] = useState<string[]>([]);
+  const [loadingSlots, setLoadingSlots] = useState(false);
+
+  const fetchBlockedTimes = useCallback(async (date: Date): Promise<string[]> => {
+    setLoadingSlots(true);
+    try {
+      const dtString = new Date(
+        Date.UTC(date.getFullYear(), date.getMonth(), date.getDate())
+      ).toISOString().split("T")[0];
+      
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_URL}/api/schedule/get-appointments?userId=${clinic.id}&date=${dtString}`
+      );
+      
+      if (!response.ok) {
+        throw new Error('Erro ao buscar horários');
+      }
+      
+      const json = await response.json();
+      return Array.isArray(json) ? json : [];
+    } catch (error) {
+      console.error('Erro ao buscar horários bloqueados:', error);
+      return [];
+    } finally {
+      setLoadingSlots(false);
+    }
+  }, [clinic.id]);
+
+  useEffect(() => {
+    if (!selectedDate) return;
+
+    const processTimeSlots = async () => {
+      const blocked = await fetchBlockedTimes(selectedDate);
+      setBlockedTimes(blocked);
+
+      const weekDayIndex = selectedDate.getUTCDay().toString();
+      
+      const clinicTimesFiltered = clinic.times
+        .filter(time => time.startsWith(`${weekDayIndex}-`))
+        .map(time => time.replace(`${weekDayIndex}-`, ''));
+
+      const finalSlots = clinicTimesFiltered.map((time) => ({
+        time,
+        available: !blocked.includes(time)
+      }));
+      
+      setAvailableTimeSlots(finalSlots);
+    };
+
+    processTimeSlots();
+  }, [selectedDate, clinic.times, fetchBlockedTimes]);
+
+  // Verificar se o horário selecionado ainda está disponível
+  const isSelectedTimeStillAvailable = useMemo(() => {
+    if (!selectedTime) return true;
+    return availableTimeSlots.some(slot => slot.time === selectedTime && slot.available);
+  }, [selectedTime, availableTimeSlots]);
+
+  return {
+    availableTimeSlots,
+    blockedTimes,
+    loadingSlots,
+    isSelectedTimeStillAvailable
+  };
+};
+
+export function ScheduleContent({ clinic }: ScheduleContentProps) {
   const router = useRouter();
   const form = useAppointmentForm();
   const { watch } = form;
 
   const selectedDate = watch("date");
   const selectedServiceId = watch("serviceId");
-
   const [selectedTime, setSelectedTime] = useState("");
-  const [availableTimeSlots, setAvailableTimeSlots] = useState<TimeSlot[]>([]);
-  const [loadingSlots, setLoadingSlots] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Quais os horários bloqueados 01/02/2025 > ["15:00", "18:00"]
-  const [blockedTimes, setBlockedTimes] = useState<string[]>([])
+  const { 
+    availableTimeSlots, 
+    blockedTimes, 
+    loadingSlots, 
+    isSelectedTimeStillAvailable 
+  } = useTimeSlots(clinic, selectedDate, selectedTime);
 
-  // Função que busca os horários bloqueados (via Fetch HTTP)
-
-    const fetchBlockedTimes = useCallback( async (date: Date): Promise<string[]> => {
-      setLoadingSlots(true);
-      try{
-        // console.log(date.toISOString().split("T")[0])
-        const dtString = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes())).toISOString().split("T")[0];
-        const urlFetch = `${process.env.NEXT_PUBLIC_URL}/api/schedule/get-appointments?userId=${clinic.id}&date=${dtString}`
-        //console.log(urlFetch);
-        const response = await fetch(urlFetch);
-        const json = await response.json();
-        setLoadingSlots(false);
-        return json;
-
-      }catch(err){
-        console.log(err);
-        setLoadingSlots(false);
-        return [];
-      }
-  }, [clinic.id])
-
-  useEffect(()=>{
-    // console.log('Dia selecionado: ', selectedDate)
-    if (selectedDate){
-      fetchBlockedTimes(
-        new Date(
-          Date.UTC(
-            selectedDate.getFullYear(),
-            selectedDate.getMonth(),
-            selectedDate.getDate(),
-            selectedDate.getHours(),
-            selectedDate.getMinutes()
-          )
-        )
-      ).then((blocked) => {
-        // console.log("Horários reservados: ", blocked)
-        setBlockedTimes(blocked);
-
-        // Função para normalizar o selectedTime para comparação
-        // const normalizeSelectedTime = (time: string) => {
-        //   if (time.includes('-')) {
-        //     return time.split('-')[1]; // Remove o prefixo do dia se existir
-        //   }
-        //   console.log(`Tempo normalizado: ${time}`);
-        //   return time;
-        // };
-
-        const weekDayIndex: string = `${selectedDate.getUTCDay()}`;
-        
-        const clinicTimesFiltered = clinic.times
-        .filter(time => time.startsWith(`${weekDayIndex}-`))
-        .map(time => time.replace(`${weekDayIndex}-`, ''));
-
-
-        const times = clinicTimesFiltered;
-        const finalSlot = times.map((time) => (
-          {
-          time: time,
-          available: !blocked.includes(time)
-        }))
-        
-        //console.log(finalSlot)
-
-        setAvailableTimeSlots(finalSlot);
-
-        // Verificar se o slot estiver disponível, limpar a seleção
-
-        const stillAvailable = finalSlot.find(
-          (slot) => {
-            //console.log(`Verificar: `, slot.time, ` `, selectedTime, ` `, slot.available  )
-            return slot.time === selectedTime && slot.available
-          }
-        )
-        
-        if(!stillAvailable){
-          // console.log(`passou aqui.`)
-          setSelectedTime("");
-        }
-      })
+  // Limpar horário selecionado se não estiver mais disponível
+  useEffect(() => {
+    if (!isSelectedTimeStillAvailable) {
+      setSelectedTime("");
     }
-  }, [selectedDate, clinic.times, fetchBlockedTimes, selectedTime])
+  }, [isSelectedTimeStillAvailable]);
 
-  async function handleRegisterAppointmnent(formData: AppointmentFormData) {
-    if(!selectedTime){
-      msgInfo("É necessário definir um horário para registro de agendamento.")
-      return;
-    }
-    const response = await createNewAppointment({
-      name: formData.name,
-      email: formData.email,
-      cpf: extractFormatCPF(formData.cpf),
-      phone: formData.phone,
-      date: formData.date,
-      clinicId: clinic.id,
-      serviceId: formData.serviceId,
-      time: selectedTime,
-    })
+  // Calcular slots necessários baseado no serviço selecionado
+  const requiredSlots = useMemo(() => {
+    if (!selectedServiceId) return 1;
+    const service = clinic.services.find(s => s.id === selectedServiceId);
+    return service ? Math.ceil(service.duration / 30) : 1;
+  }, [selectedServiceId, clinic.services]);
 
-    if(response.error){
-      msgError(response.error)
+  // Verificar se o formulário é válido
+  const isFormValid = useMemo(() => {
+    const { name, email, phone, date } = form.getValues();
+    return Boolean(name && email && phone && date && selectedTime && !isSubmitting);
+  }, [form, selectedTime, isSubmitting]);
+
+  const handleRegisterAppointment = useCallback(async (formData: AppointmentFormData) => {
+    if (!selectedTime) {
+      msgInfo("É necessário definir um horário para registro de agendamento.");
       return;
     }
 
-    msgSuccess("Consulta agendada com sucesso.");
-    form.reset();
-    setSelectedTime("");
-
-    router.refresh();
-
-    reloadAfterDelay();
+    setIsSubmitting(true);
     
-  }
+    try {
+      const response = await createNewAppointment({
+        name: formData.name,
+        email: formData.email,
+        cpf: extractFormatCPF(formData.cpf),
+        phone: formData.phone,
+        date: formData.date,
+        clinicId: clinic.id,
+        serviceId: formData.serviceId,
+        time: selectedTime,
+      });
 
-  function reloadAfterDelay() {
-      setTimeout(() => {
-          window.location.reload();
-      }, 2000); // 2000 milissegundos (2 segundos)
-  }
+      if (response.error) {
+        msgError(response.error);
+        return;
+      }
+
+      msgSuccess("Consulta agendada com sucesso.");
+      form.reset();
+      setSelectedTime("");
+      router.refresh();
+      
+      // Reload após delay
+      setTimeout(() => window.location.reload(), 2000);
+      
+    } catch (error) {
+      msgError("Erro inesperado ao agendar consulta.");
+      console.error('Erro no agendamento:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [selectedTime, clinic.id, form, router]);
+
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="h-32 bg-gradient-to-b from-white via-blue-100 to-indigo-200 " />
+      {/* Header gradient */}
+      <div className="h-32 bg-gradient-to-b from-white via-blue-100 to-indigo-200" />
 
-      <section className="contianer mx-auto px-4 -mt-16">
+      {/* Clinic info section */}
+      <section className="container mx-auto px-4 -mt-16">
         <div className="max-w-2xl mx-auto">
           <article className="flex flex-col items-center">
-            <div className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-white mb-8">
+            {/* Clinic image */}
+            <div className="relative w-48 h-48 rounded-full overflow-hidden border-4 border-white mb-8 shadow-lg">
               <Image
-                src={clinic.image ? clinic.image : imgTest}
+                src={clinic.image || imgTest}
                 alt="Foto da clinica"
                 className="object-cover"
                 fill
+                priority
               />
             </div>
 
-            <h1 className="text-2xl font-bold mb-2">
+            {/* Clinic name */}
+            <h1 className="text-2xl font-bold mb-2 text-center">
               {capitalizeProperNames(clinic.name || '')}
             </h1>
-            <div className="flex items-center gap-1">
-              <MapPin className="w-5 h-5" />
-              <span>
-                {clinic.address ? clinic.address : "Endereço não informado"}
-              </span>
-            </div>
+            
+            {/* Address with Google Maps Accordion */}
+            <AddressAccordion clinic={clinic} />
           </article>
-
         </div>
       </section>
 
-
+      {/* Appointment form section */}
       <section className="max-w-2xl mx-auto w-full mt-6 flex-1">
-        {/* Formulário de agendamento */}
         <Form {...form}>
           <form
-            onSubmit={form.handleSubmit(handleRegisterAppointmnent)}
+            onSubmit={form.handleSubmit(handleRegisterAppointment)}
             className="mx-2 space-y-6 bg-white p-6 border rounded-md shadow-lg"
           >
-
+            {/* Nome */}
             <FormField
               control={form.control}
               name="name"
               render={({ field }) => (
-                <FormItem className="my-2">
+                <FormItem>
                   <FormLabel className="font-semibold">Nome completo:</FormLabel>
                   <FormControl>
                     <Input
-                      id="name"
                       placeholder="Digite seu nome completo..."
                       {...field}
                     />
@@ -229,15 +375,16 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
               )}
             />
 
+            {/* Email */}
             <FormField
               control={form.control}
               name="email"
               render={({ field }) => (
-                <FormItem className="my-2">
+                <FormItem>
                   <FormLabel className="font-semibold">Email:</FormLabel>
                   <FormControl>
                     <Input
-                      id="email"
+                      type="email"
                       placeholder="Digite seu email..."
                       {...field}
                     />
@@ -247,20 +394,20 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
               )}
             />
 
+            {/* CPF */}
             <FormField
               control={form.control}
               name="cpf"
               render={({ field }) => (
-                <FormItem className="my-2">
+                <FormItem>
                   <FormLabel className="font-semibold">CPF:</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      id="cpf"
                       placeholder="999.999.999-99"
                       onChange={(e) => {
-                        const formattedValue = formatCPF(e.target.value)
-                        field.onChange(formattedValue)
+                        const formattedValue = formatCPF(e.target.value);
+                        field.onChange(formattedValue);
                       }}
                     />
                   </FormControl>
@@ -269,20 +416,20 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
               )}
             />
 
+            {/* Telefone */}
             <FormField
               control={form.control}
               name="phone"
               render={({ field }) => (
-                <FormItem className="my-2">
+                <FormItem>
                   <FormLabel className="font-semibold">Telefone:</FormLabel>
                   <FormControl>
                     <Input
                       {...field}
-                      id="phone"
                       placeholder="(XX) XXXXX-XXXX"
                       onChange={(e) => {
-                        const formattedValue = formatPhone(e.target.value)
-                        field.onChange(formattedValue)
+                        const formattedValue = formatPhone(e.target.value);
+                        field.onChange(formattedValue);
                       }}
                     />
                   </FormControl>
@@ -290,16 +437,18 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                 </FormItem>
               )}
             />
+
+            {/* Serviço */}
             <FormField
               control={form.control}
               name="serviceId"
               render={({ field }) => (
-                <FormItem className="my-2">
+                <FormItem>
                   <FormLabel className="font-semibold">Defina o serviço:</FormLabel>
                   <FormControl>
-                    <Select onValueChange={(value:any) => {
-                      field.onChange(value)
-                      setSelectedTime("")
+                    <Select onValueChange={(value) => {
+                      field.onChange(value);
+                      setSelectedTime("");
                     }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione um serviço" />
@@ -311,7 +460,7 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                             <SelectItem key={service.id} value={service.id}>
                               {service.name} - {Math.floor(service.duration / 60)}h {service.duration % 60}min
                             </SelectItem>
-                        ))}
+                          ))}
                       </SelectContent>
                     </Select>
                   </FormControl>
@@ -319,21 +468,22 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
                 </FormItem>
               )}
             />
+
+            {/* Data */}
             <FormField
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem className="mb-3! gap-0">
-                  <FormLabel className="font-semibold mb-2">Data do agendamento:</FormLabel>
-                  <FormControl className="pt-2">
+                <FormItem>
+                  <FormLabel className="font-semibold">Data do agendamento:</FormLabel>
+                  <FormControl>
                     <DateTimePicker
                       initialDate={new Date()}
-                      className="pl-3 w-full rounded-lg border m-0! text-sm"
+                      className="pl-3 w-full rounded-lg border text-sm"
                       onChange={(date) => {
-                        // console.log('VerDate: ', date)
                         if (date) {
-                          field.onChange(date)
-                          setSelectedTime("")
+                          field.onChange(date);
+                          setSelectedTime("");
                         }
                       }}
                     />
@@ -343,53 +493,62 @@ export function ScheduleContent({ clinic }: ScheduleContentProps) {
               )}
             />
 
+            {/* Horários disponíveis */}
             {selectedServiceId && (
               <div className="pt-1">
-                <Label className='font-semibold pb-2'>Horários disponíveis:</Label>
+                <Label className="font-semibold pb-2">Horários disponíveis:</Label>
                 <div className="bg-gray-100 p-4 rounded-lg">
                   {loadingSlots ? (
-                    <p>Carregando horários...</p>
-                  ): availableTimeSlots.length === 0 ? (
-                    <p>Nenhum horário disponível.</p>
-                  ): (
+                    <div className="flex items-center justify-center py-4">
+                      <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                      <span>Carregando horários...</span>
+                    </div>
+                  ) : availableTimeSlots.length === 0 ? (
+                    <p className="text-center text-gray-500 py-4">
+                      Nenhum horário disponível para esta data.
+                    </p>
+                  ) : (
                     <ScheduleTimeList
-                      onSelectTime={(time) => setSelectedTime(time)}
+                      onSelectTime={setSelectedTime}
                       clinicTimes={clinic.times}
                       blockedTimes={blockedTimes}
                       availableTimeSlots={availableTimeSlots}
                       selectedTime={selectedTime}
                       selectedDate={selectedDate}
-                      requiredSlots={
-                        clinic.services.find(service => service.id === selectedServiceId) ? 
-                        Math.ceil(clinic.services.find(service => service.id === selectedServiceId)!.duration / 30)
-                        : 1
-                      }
+                      requiredSlots={requiredSlots}
                     />
                   )}
                 </div>
               </div>
             )}
 
-
+            {/* Submit button */}
             {clinic.status ? (
               <Button
                 type="submit"
-                className="w-full bg-emerald-500 hover:bg-emerald-400"
-                disabled={!watch("name") || !watch("email") || !watch("phone") || !watch("date")}
+                className="w-full bg-emerald-500 hover:bg-emerald-400 disabled:opacity-50"
+                disabled={!isFormValid}
               >
-                <CalendarArrowUp className="w-5! h-5!" />
-                Realizar agendamento
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin mr-2" />
+                    Agendando...
+                  </>
+                ) : (
+                  <>
+                    <CalendarArrowUp className="w-5 h-5 mr-2" />
+                    Realizar agendamento
+                  </>
+                )}
               </Button>
             ) : (
-              <p className="bg-red-500 text-white text-center px-4 py-2 rounded-md">
-                A clinica está fechada nesse momento.
-              </p>
+              <div className="bg-red-500 text-white text-center px-4 py-3 rounded-md">
+                A clínica está fechada no momento.
+              </div>
             )}
-
           </form>
         </Form>
       </section>
-
     </div>
-  )
+  );
 }

@@ -26,7 +26,7 @@ export function Header() {
     ]
 
     async function hgLogin(){
-        await hgRegister("github")
+        await hgRegister("google")
     }
 
     const NavLinks = () => (

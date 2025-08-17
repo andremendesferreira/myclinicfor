@@ -2,6 +2,8 @@
 
 import { signIn } from "@/lib/auth";
 
-export async function hgRegister(provider: string){
+type Provider = "google" | "github";
+
+export async function hgRegister(provider: Provider){
     await signIn(provider, { redirectTo: "/dashboard"})
 }

@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma"
 export async function getProfessionals() {
 
   try {
+    
     const professionals = await prisma.user.findMany({
       where: {
         status: true,
@@ -17,6 +18,7 @@ export async function getProfessionals() {
     return professionals;
 
   } catch (err) {
+    console.error("Error fetching professionals:", err);
     return []
   }
 

@@ -6,12 +6,15 @@ import Link from "next/link";
 import { CalendarPlus } from "lucide-react";
 import { Prisma } from "@/generated/prisma";
 import { capitalizeProperNames } from "@/app/utils/formatName";
+import { VipBadge } from "./vip-badge"
 
 type UserWithSubscription = Prisma.UserGetPayload<{
   include: {
-    subscription: true,
+    subscription: true
   }
-}>
+}> & {
+  ranked: number
+}
 
 interface ProfessionalsProps {
   professionals: UserWithSubscription[]
@@ -39,13 +42,16 @@ export function Professionals({ professionals }: ProfessionalsProps): React.Reac
                       fill
                       className="object-cover"
                     />
+
+                    <VipBadge ranked={clinic.ranked} />
+
                   </div>
                   <div className="p-4 space-y-4 flex-grow">
                     <div className="flex items-baseline justify-between">
                       <div>
-                        <h3 className="text-xl font-semibold text-zinc-900 dark:text-white">{capitalizeProperNames(clinic.name || '')}</h3>
-                        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold">Endereço:</span> {clinic.address}</p>
-                        <p className="text-sm text-zinc-600 dark:text-zinc-400"><span className="font-semibold">Especialidade:</span> {clinic.activities.join(', ')}</p>
+                        <h3 className="text-xl font-semibold text-zinc-900 dark:text-white line-clamp-1">{capitalizeProperNames(clinic.name || '')}</h3>
+                        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2"><span className="font-semibold">Endereço:</span> {clinic.address}</p>
+                        <p className="text-sm text-zinc-600 dark:text-zinc-400 line-clamp-2"><span className="font-semibold">Especialidade:</span> {clinic.activities.join(', ')}</p>
                       </div>
                       {/* <div className={`w-2.5 h-2.5 rounded-full ${clinic.subscription?.status === "active" ? "bg-emerald-500" : "bg-gray-400"}`}></div> */}
                     </div>
