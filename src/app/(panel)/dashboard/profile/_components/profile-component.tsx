@@ -1,6 +1,6 @@
 "use client"
 import { useState, useEffect } from 'react'
-import { Card, CardContent, CardTitle } from '@/components/ui/card'
+//import { Card, CardContent, CardTitle } from '@/components/ui/card'
 import { Form } from '@/components/ui/form'
 import { Button } from '@/components/ui/button'
 import { UserRoundCog } from 'lucide-react'
@@ -91,16 +91,20 @@ export function ProfileContent({ user, activities }: ProfileContentProps) {
 
 
   return (
-    <div className='mx-auto'>
+    <div className="space-y-4">
+      {/* Título e botão */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+            Meu Perfil
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Gerencie as informações do seu perfil.
+          </p>
+        </div>
+      </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
-          <Card>
-            <CardTitle className='flex items-center justify-self-auto'>
-              <UserRoundCog className="ml-4 w-10 h-10 mr-4 text-emerald-500"/>
-              <span className='text-3xl text-shadow-md lg:text-2xl'>Meu Perfil</span>
-            </CardTitle>
-            
-            <CardContent className='space-y-6'>
               <AvatarProfile image={{
                 imageUrl: user.image,
                 alt: 'Imagem clinica'
@@ -133,8 +137,6 @@ export function ProfileContent({ user, activities }: ProfileContentProps) {
                   Salvar alteração
                 </Button>
               </div>
-            </CardContent>
-          </Card>
         </form>
       </Form>
     </div>
