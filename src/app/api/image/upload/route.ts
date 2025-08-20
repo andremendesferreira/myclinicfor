@@ -37,7 +37,7 @@ export const POST = async (req: Request) => {
             return NextResponse.json({ "error": "Falha ao obter o ID do usuário." }, { status: 401 });
         }
 
-        if (!file || !(file instanceof File)) {
+        if (!file || !file.name || !file.type) {
             return NextResponse.json({ "error": "Falha ao obter o arquivo." }, { status: 400 });
         }
 
