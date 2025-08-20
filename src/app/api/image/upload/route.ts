@@ -27,7 +27,10 @@ export const POST = async (req: Request) => {
     try {
         const formData = await req.formData();
         const file = formData.get('file') as File;
+
         const userId = formData.get('userId') as string;
+
+        console.log(file)
 
         // Verificações de validação primeiro
         if(!userId || userId.trim() === "") {
