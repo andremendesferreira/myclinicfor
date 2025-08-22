@@ -116,6 +116,7 @@ enum Plan {
   BASIC // Plano básico
   PREMIUM // Plano premium
   PROFESSIONAL // Plano profissional
+  TOP // Pagamento de prioridade na busca
 }
 
 model Subscription {

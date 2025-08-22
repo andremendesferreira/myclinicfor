@@ -30,7 +30,7 @@ export const POST = async (req: Request) => {
 
         const userId = formData.get('userId') as string;
 
-        console.log(file)
+        //console.log(file)
 
         // Verificações de validação primeiro
         if(!userId || userId.trim() === "") {
