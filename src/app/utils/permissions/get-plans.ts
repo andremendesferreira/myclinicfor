@@ -12,6 +12,7 @@ type PlansProps = {
     BASIC: PlanDetailProps;
     PREMIUM: PlanDetailProps;
     PROFESSIONAL: PlanDetailProps;
+    TOP: PlanDetailProps;  // ✅ ADICIONADO
 }
 
 const PLAN_CONTROL : PlansProps = {
@@ -30,8 +31,11 @@ const PLAN_CONTROL : PlansProps = {
     PREMIUM: {
         maxServices: 50,
         menuLayout: 3
+    },
+    TOP: {
+        maxServices: 50,
+        menuLayout: 4 
     }
-
 }
 
 export async function getPlan(planId: Plan){

@@ -17,6 +17,7 @@ export type PlansProps = {
     BASIC: PlanDetailProps;
     PREMIUM: PlanDetailProps;
     PROFESSIONAL: PlanDetailProps;
+    TOP: PlanDetailProps;
 }
 
 export const PLANS: PlansProps = {
@@ -109,5 +110,33 @@ export const PLANS: PlansProps = {
     price: 97.99,
     activatePromo: true,
     promoPrice: 79.99
+  },
+  TOP: {
+    name: "Top Prioridade",
+    maxServices: 50,  // Mesmos limites do PREMIUM
+    menuLayout: 4,
+    description: {
+        title: "Plano Top - Prioridade no Ranking",
+        text: "Todos os recursos do Premium + prioridade máxima no ranking de busca.",
+        features: [
+            "🔥 Prioridade MÁXIMA no ranking público",
+            "⭐ Destaque especial na listagem",
+            "Limite de serviço ativo 50",
+            "Limite cadastro de serviço 55",
+            "Agendamento de consultas",
+            "Página de agendamento",
+            "Registro de consultas",
+            "Personalização de perfil",
+            "Gerenciamento de pacientes",
+            "Relatórios avançados",
+            "Suporte prioritário VIP",
+            "Mensagem informativa via WhatsApp",
+            "Todas as funcionalidades",
+            "Badge exclusivo 'TOP'"
+        ]
+    },
+    price: 129.99,
+    activatePromo: true,
+    promoPrice: 99.99
   }
 };

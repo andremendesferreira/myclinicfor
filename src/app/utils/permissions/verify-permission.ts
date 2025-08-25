@@ -7,7 +7,7 @@ import { controlCreateServices } from "./controlCreateServices";
 
 // Verificar o perfil de usuário
 
-export type PLAN_TYPE_PROP = "FREE" | "BASIC" | "PROFESSIONAL" | "PREMIUM" | "EXPIRED";
+export type PLAN_TYPE_PROP = "FREE" | "BASIC" | "PROFESSIONAL" | "PREMIUM" | "EXPIRED" | "TOP";
 type TypeCheck = "service";
 
 export interface ResultPermissionProps{

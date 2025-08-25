@@ -1,6 +1,7 @@
 "use client"
 
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 
 export function msgSuccess(message: string){
       toast.success(message, {
@@ -44,5 +45,18 @@ export function msgInfo(message: string){
         backgroundColor: 'var(--color-blue-100)', // Cor de fundo
         color: 'var(--color-blue-800)', // Cor do texto
      },
+  });
+}
+export function msgLoading(message: string){
+  return toast.loading(message, {
+    icon: <Loader2 className="h-4 w-4 animate-spin" />,
+    style: {
+      border: '2px solid var(--color-gray-200)',
+      borderRadius: '8px',
+      boxShadow: '0 4px 10px rgba(0, 0, 0, 0.2)',
+      backgroundColor: 'var(--color-gray-100)',
+      color: 'var(--color-gray-800)',
+    },
+    // Loading toasts precisam ser dismissed manualmente
   });
 }
