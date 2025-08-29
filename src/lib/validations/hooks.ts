@@ -9,6 +9,7 @@ import {
   createAppointmentSchema,
   createReminderSchema 
 } from './index'
+import { z } from 'zod'
 
 export function useCreatePatientForm(defaultValues?: any) {
   return useForm({
@@ -63,6 +64,31 @@ export function useCreateReminderForm(defaultValues?: any) {
     defaultValues: defaultValues || {
       description: "",
       priority: "medium"
+    }
+  })
+}
+
+const createServiceSchemaForForm = z.object({
+  name: z
+    .string()
+    .min(2, "Nome do serviço deve ter pelo menos 2 caracteres")
+    .max(100, "Nome muito longo"),
+  price: z
+    .number()
+    .min(0, "Preço não pode ser negativo"),
+  duration: z
+    .number()
+    .min(15, "Duração mínima é 15 minutos")
+    .max(480, "Duração máxima é 8 horas"),
+})
+
+export function useCreateServiceFormCorrect(options?: { defaultValues?: any }) {
+  return useForm({
+    resolver: zodResolver(createServiceSchemaForForm),
+    defaultValues: options?.defaultValues || {
+      name: "",
+      price: 0,
+      duration: 60
     }
   })
 }

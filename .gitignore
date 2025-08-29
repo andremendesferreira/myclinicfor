@@ -16,6 +16,11 @@
 # testing
 /coverage
 
+# backup folder
+_bkp
+_bkp/*
+*.backup
+
 # next.js
 /.next/
 /out/
