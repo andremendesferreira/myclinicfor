@@ -1,142 +1,175 @@
 // src/lib/validations/index.ts
-// ✅ VERSÃO LIMPA (sem imports React Hook Form)
+// ================================================================
+// 🛡️ VALIDAÇÕES CENTRALIZADAS - MyClinicSOL
+// ================================================================
+// Este arquivo centraliza todas as validações Zod do projeto
+// Criado para resolver imports quebrados e padronizar validações
 
 import { z } from 'zod'
 
 // ===============================================
-// 🛠️ VALIDADORES BASE E UTILITIES
+// 🛠️ UTILITIES & HELPERS
 // ===============================================
 
-// Validador de CPF
-export const validateCPF = (cpf: string): boolean => {
+/**
+ * Valida CPF brasileiro
+ * @param cpf - CPF em qualquer formato
+ * @returns true se válido, false se inválido
+ */
+export function validateCPF(cpf: string): boolean {
+  if (!cpf) return false
+  
   const cleanCpf = cpf.replace(/\D/g, '')
   
   if (cleanCpf.length !== 11) return false
-  if (/^(\d)\1{10}$/.test(cleanCpf)) return false // CPFs com dígitos iguais
+  if (/^(\d)\1{10}$/.test(cleanCpf)) return false // 111.111.111-11
   
-  const calculateDigit = (cpf: string, factor: number): number => {
-    const sum = cpf
-      .slice(0, factor - 1)
-      .split('')
-      .reduce((acc, digit, index) => acc + parseInt(digit) * (factor - index), 0)
-    const remainder = sum % 11
-    return remainder < 2 ? 0 : 11 - remainder
+  let sum = 0
+  for (let i = 0; i < 9; i++) {
+    sum += parseInt(cleanCpf.charAt(i)) * (10 - i)
   }
+  let remainder = (sum * 10) % 11
+  if (remainder === 10) remainder = 0
+  if (remainder !== parseInt(cleanCpf.charAt(9))) return false
   
-  const digit1 = calculateDigit(cleanCpf, 10)
-  const digit2 = calculateDigit(cleanCpf, 11)
+  sum = 0
+  for (let i = 0; i < 10; i++) {
+    sum += parseInt(cleanCpf.charAt(i)) * (11 - i)
+  }
+  remainder = (sum * 10) % 11
+  if (remainder === 10) remainder = 0
+  if (remainder !== parseInt(cleanCpf.charAt(10))) return false
   
-  return cleanCpf.endsWith(`${digit1}${digit2}`)
+  return true
 }
 
-// Validador de telefone brasileiro
-export const validatePhone = (phone: string): boolean => {
+/**
+ * Formata CPF: 12345678901 → 123.456.789-01
+ */
+export function formatCPF(cpf: string): string {
+  const cleanCpf = cpf.replace(/\D/g, '')
+  if (cleanCpf.length === 11) {
+    return cleanCpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
+  }
+  return cpf
+}
+
+/**
+ * Formata telefone: 85999998888 → (85) 99999-8888
+ */
+export function formatPhone(phone: string): string {
   const cleanPhone = phone.replace(/\D/g, '')
-  return /^[1-9]{2}[2-9]\d{7,8}$/.test(cleanPhone)
-}
-
-// Formatadores
-export const formatPhone = (phone: string): string => {
-  const clean = phone.replace(/\D/g, '')
-  if (clean.length === 11) {
-    return `(${clean.slice(0, 2)}) ${clean.slice(2, 7)}-${clean.slice(7)}`
-  } else if (clean.length === 10) {
-    return `(${clean.slice(0, 2)}) ${clean.slice(2, 6)}-${clean.slice(6)}`
+  if (cleanPhone.length === 11) {
+    return cleanPhone.replace(/(\d{2})(\d{5})(\d{4})/, '($1) $2-$3')
+  } else if (cleanPhone.length === 10) {
+    return cleanPhone.replace(/(\d{2})(\d{4})(\d{4})/, '($1) $2-$3')
   }
   return phone
 }
 
-export const formatCPF = (cpf: string): string => {
-  const clean = cpf.replace(/\D/g, '')
-  return clean.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
-}
-
-export const capitalizeProperNames = (name: string): string => {
+/**
+ * Capitaliza nomes próprios
+ */
+export function capitalizeProperNames(name: string): string {
+  if (!name) return ''
+  
   return name
     .toLowerCase()
     .split(' ')
     .map(word => {
-      if (['de', 'da', 'do', 'das', 'dos', 'e'].includes(word)) return word
+      // Preposições e artigos que ficam em minúscula
+      const lowercase = ['de', 'da', 'do', 'das', 'dos', 'e', 'em', 'na', 'no']
+      if (lowercase.includes(word)) return word
       return word.charAt(0).toUpperCase() + word.slice(1)
     })
     .join(' ')
 }
 
+/**
+ * Formata valor monetário
+ */
+export function formatCurrency(value: number): string {
+  return new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  }).format(value)
+}
+
 // ===============================================
-// 🔐 SCHEMAS BASE
+// 🔧 ZOD SCHEMAS REUTILIZÁVEIS
 // ===============================================
 
-export const baseUserSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Nome deve ter pelo menos 2 caracteres")
-    .max(100, "Nome muito longo")
-    .transform(capitalizeProperNames),
-  email: z
-    .string()
-    .email("Email inválido")
-    .toLowerCase()
-    .trim(),
-  phone: z
-    .string()
-    .optional()
-    .refine(phone => !phone || validatePhone(phone), "Telefone inválido")
-    .transform(phone => phone ? formatPhone(phone) : phone),
-})
-
-export const cpfSchema = z
-  .string()
-  .min(1, "CPF é obrigatório")
-  .refine(validateCPF, "CPF inválido")
-  .transform(cpf => cpf.replace(/\D/g, '')) // Armazena apenas números
-
-export const phoneSchema = z
+const phoneSchema = z
   .string()
   .min(1, "Telefone é obrigatório")
-  .refine(validatePhone, "Telefone inválido")
-  .transform(formatPhone)
+  .refine(
+    (val) => {
+      const clean = val.replace(/\D/g, '')
+      return clean.length >= 10 && clean.length <= 11
+    },
+    "Telefone deve ter 10 ou 11 dígitos"
+  )
+
+const cpfSchema = z
+  .string()
+  .min(1, "CPF é obrigatório")
+  .transform(val => val.replace(/\D/g, ''))
+  .refine(val => val.length === 11, "CPF deve ter 11 dígitos")
+  .refine(validateCPF, "CPF inválido")
+
+const emailSchema = z
+  .string()
+  .min(1, "Email é obrigatório")
+  .email("Email inválido")
+  .toLowerCase()
+
+const nameSchema = z
+  .string()
+  .min(2, "Nome deve ter pelo menos 2 caracteres")
+  .max(100, "Nome muito longo")
+  .transform(capitalizeProperNames)
 
 // ===============================================
-// 👨‍👩‍👦 PATIENT SCHEMAS
+// 👥 PATIENT SCHEMAS
 // ===============================================
 
 export const createPatientSchema = z.object({
-  nome: z
-    .string()
-    .min(2, "Nome deve ter pelo menos 2 caracteres")
-    .max(100, "Nome muito longo")
-    .transform(capitalizeProperNames),
+  nome: nameSchema,
   cpf: cpfSchema,
   telefone: phoneSchema,
-  email: z
-    .string()
-    .email("Email inválido")
-    .toLowerCase()
-    .trim(),
+  email: emailSchema,
   dataNascimento: z
     .date()
-    .max(new Date(), "Data de nascimento não pode ser futura")
+    .max(new Date(), "Data de nascimento deve ser no passado")
     .optional(),
-  endereco: z.string().max(200, "Endereço muito longo").optional(),
-  profissao: z.string().max(100, "Profissão muito longa").optional(),
-  estadoCivil: z.enum(['solteiro', 'casado', 'divorciado', 'viuvo', 'uniao_estavel']).optional(),
+  endereco: z
+    .string()
+    .max(200, "Endereço muito longo")
+    .optional(),
+  profissao: z
+    .string()
+    .max(100, "Profissão muito longa")
+    .optional(),
+  estadoCivil: z
+    .enum(['solteiro', 'casado', 'divorciado', 'viuvo', 'uniao_estavel'])
+    .optional(),
   contatoEmergencia: phoneSchema.optional(),
-  convenio: z.string().max(100, "Nome do convênio muito longo").optional(),
-  numeroConvenio: z.string().max(50, "Número do convênio muito longo").optional(),
+  convenio: z
+    .string()
+    .max(100, "Nome do convênio muito longo")
+    .optional(),
+  numeroConvenio: z
+    .string()
+    .max(50, "Número do convênio muito longo")
+    .optional(),
 })
 
 export const updatePatientSchema = createPatientSchema.partial().extend({
   id: z.string().uuid("ID do paciente inválido"),
 })
 
-export const searchPatientSchema = z.object({
-  search: z.string().min(1, "Termo de busca é obrigatório"),
-  limit: z.number().min(1).max(50).default(20),
-  offset: z.number().min(0).default(0),
-})
-
 // ===============================================
-// 🩺 SERVICE SCHEMAS  
+// 🛠️ SERVICE SCHEMAS
 // ===============================================
 
 export const createServiceSchema = z.object({
@@ -151,7 +184,7 @@ export const createServiceSchema = z.object({
   price: z
     .number()
     .min(0, "Preço não pode ser negativo")
-    .int("Preço deve ser um número inteiro"),
+    .max(999999, "Preço muito alto"),
   duration: z
     .number()
     .min(15, "Duração mínima é 15 minutos")
@@ -159,7 +192,7 @@ export const createServiceSchema = z.object({
   color: z
     .string()
     .regex(/^#[0-9A-F]{6}$/i, "Cor deve estar em formato hexadecimal")
-    .optional(),
+    .default("#3b82f6"),
 })
 
 export const updateServiceSchema = createServiceSchema.partial().extend({
@@ -176,14 +209,8 @@ export const toggleServiceStatusSchema = z.object({
 // ===============================================
 
 export const createAppointmentSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Nome deve ter pelo menos 2 caracteres")
-    .transform(capitalizeProperNames),
-  email: z
-    .string()
-    .email("Email inválido")
-    .toLowerCase(),
+  name: nameSchema,
+  email: emailSchema,
   phone: phoneSchema,
   cpf: cpfSchema,
   serviceId: z.string().uuid("Serviço inválido"),
@@ -200,39 +227,6 @@ export const updateAppointmentStatusSchema = z.object({
 
 export const cancelAppointmentSchema = z.object({
   appointmentId: z.string().uuid("ID do agendamento inválido"),
-})
-
-// ===============================================
-// 🏥 CONSULTATION SCHEMAS
-// ===============================================
-
-export const createConsultationSchema = z.object({
-  patientId: z.string().uuid("ID do paciente inválido"),
-  serviceId: z.string().uuid("ID do serviço inválido"),
-  consultationDate: z.date().optional(),
-  anamnese: z.string().max(5000, "Anamnese muito longa").optional(),
-  exameClinico: z.string().max(5000, "Exame clínico muito longo").optional(),
-  diagnostico: z.string().max(2000, "Diagnóstico muito longo").optional(),
-  conduta: z.string().max(2000, "Conduta muito longa").optional(),
-  familyHistory: z.string().max(3000, "Histórico familiar muito longo").optional(),
-  observations: z.string().max(2000, "Observações muito longas").optional(),
-  valorCobrado: z
-    .number()
-    .min(0, "Valor não pode ser negativo")
-    .int("Valor deve ser um número inteiro")
-    .optional(),
-  formaPagamento: z
-    .enum(['dinheiro', 'cartao', 'pix', 'convenio'])
-    .optional(),
-})
-
-export const updateConsultationSchema = createConsultationSchema.partial().extend({
-  id: z.string().uuid("ID da consulta inválido"),
-})
-
-export const addConsultationImagesSchema = z.object({
-  consultationId: z.string().uuid("ID da consulta inválido"),
-  images: z.array(z.string().url("URL da imagem inválida")),
 })
 
 // ===============================================
@@ -259,11 +253,7 @@ export const updateReminderSchema = createReminderSchema.partial().extend({
 // ===============================================
 
 export const updateProfileSchema = z.object({
-  name: z
-    .string()
-    .min(2, "Nome deve ter pelo menos 2 caracteres")
-    .transform(capitalizeProperNames)
-    .optional(),
+  name: nameSchema.optional(),
   address: z
     .string()
     .max(200, "Endereço muito longo")
@@ -279,7 +269,7 @@ export const updateProfileSchema = z.object({
     .optional(),
   times: z
     .array(z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Horário inválido"))
-    .max(48, "Máximo 48 horários por dia") // 30min slots in 24h
+    .max(50, "Máximo 50 horários")
     .optional(),
 })
 
@@ -288,42 +278,34 @@ export const updateAvatarSchema = z.object({
 })
 
 // ===============================================
-// 📊 QUERY/FILTER SCHEMAS
+// 🏥 CONSULTATION SCHEMAS
 // ===============================================
 
-export const paginationSchema = z.object({
-  page: z.number().min(1).default(1),
-  limit: z.number().min(1).max(100).default(20),
+export const createConsultationSchema = z.object({
+  patientId: z.string().uuid("ID do paciente inválido"),
+  serviceId: z.string().uuid("ID do serviço inválido"),
+  consultationDate: z.date().optional(),
+  anamnese: z.string().max(5000, "Anamnese muito longa").optional(),
+  exameClinico: z.string().max(5000, "Exame clínico muito longo").optional(),
+  diagnostico: z.string().max(2000, "Diagnóstico muito longo").optional(),
+  conduta: z.string().max(2000, "Conduta muito longa").optional(),
+  familyHistory: z.string().max(3000, "Histórico familiar muito longo").optional(),
+  observations: z.string().max(2000, "Observações muito longas").optional(),
+  valorCobrado: z
+    .number()
+    .min(0, "Valor não pode ser negativo")
+    .optional(),
+  formaPagamento: z
+    .enum(['dinheiro', 'cartao', 'pix', 'convenio'])
+    .optional(),
 })
 
-export const dateRangeSchema = z.object({
-  startDate: z.date(),
-  endDate: z.date(),
-}).refine(data => data.endDate >= data.startDate, {
-  message: "Data final deve ser posterior à data inicial",
-  path: ["endDate"],
-})
-
-export const appointmentFiltersSchema = z.object({
-  status: z.enum(['scheduled', 'completed', 'cancelled', 'no_show']).optional(),
-  serviceId: z.string().uuid().optional(),
-  dateRange: dateRangeSchema.optional(),
-  search: z.string().min(1).optional(),
-}).merge(paginationSchema)
-
-// ===============================================
-// 🔄 RESPONSE TYPE SCHEMAS
-// ===============================================
-
-export const actionResponseSchema = z.object({
-  success: z.boolean(),
-  data: z.any().optional(),
-  error: z.string().optional(),
-  fieldErrors: z.record(z.array(z.string())).optional(),
+export const updateConsultationSchema = createConsultationSchema.partial().extend({
+  id: z.string().uuid("ID da consulta inválido"),
 })
 
 // ===============================================
-// 📤 EXPORT TYPES
+// 📊 TYPES PARA TYPESCRIPT
 // ===============================================
 
 export type CreatePatientData = z.infer<typeof createPatientSchema>
@@ -331,59 +313,48 @@ export type UpdatePatientData = z.infer<typeof updatePatientSchema>
 export type CreateServiceData = z.infer<typeof createServiceSchema>
 export type UpdateServiceData = z.infer<typeof updateServiceSchema>
 export type CreateAppointmentData = z.infer<typeof createAppointmentSchema>
-export type CreateConsultationData = z.infer<typeof createConsultationSchema>
-export type UpdateConsultationData = z.infer<typeof updateConsultationSchema>
 export type CreateReminderData = z.infer<typeof createReminderSchema>
 export type UpdateProfileData = z.infer<typeof updateProfileSchema>
-export type ActionResponse<T = any> = z.infer<typeof actionResponseSchema> & { data?: T }
+export type CreateConsultationData = z.infer<typeof createConsultationSchema>
 
 // ===============================================
-// 🎨 UTILITY FUNCTIONS PARA FORMATAÇÃO
+// 🔄 ACTION RESPONSE TYPE
 // ===============================================
 
-export const formatCurrency = (value: number): string => {
-  return new Intl.NumberFormat('pt-BR', {
-    style: 'currency',
-    currency: 'BRL'
-  }).format(value / 100) // Assumindo que o valor está em centavos
-}
-
-export const parseCurrency = (value: string): number => {
-  const cleaned = value.replace(/[^\d]/g, '')
-  return parseInt(cleaned) || 0
-}
-
-export const formatDate = (date: Date): string => {
-  return new Intl.DateTimeFormat('pt-BR').format(date)
-}
-
-export const formatDateTime = (date: Date): string => {
-  return new Intl.DateTimeFormat('pt-BR', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
+export interface ActionResponse<T = any> {
+  success: boolean
+  data?: T
+  error?: string
+  fieldErrors?: Record<string, string[]>
 }
 
 // ===============================================
-// 📊 SCHEMAS COMPLEMENTARES
+// 📋 EXPORT SUMMARY
 // ===============================================
 
-export const patientSearchSchema = z.object({
-  query: z.string().min(1, "Digite algo para buscar"),
-  filter: z.enum(['nome', 'cpf', 'email']).default('nome'),
-  status: z.boolean().optional(),
-})
+/*
+UTILITIES EXPORTADAS:
+- validateCPF(cpf: string): boolean
+- formatCPF(cpf: string): string
+- formatPhone(phone: string): string
+- capitalizeProperNames(name: string): string
+- formatCurrency(value: number): string
 
-export const appointmentStatusSchema = z.enum([
-  'scheduled', 'completed', 'cancelled', 'no_show'
-])
+SCHEMAS EXPORTADOS:
+- createPatientSchema, updatePatientSchema
+- createServiceSchema, updateServiceSchema, toggleServiceStatusSchema
+- createAppointmentSchema, updateAppointmentStatusSchema, cancelAppointmentSchema
+- createReminderSchema, updateReminderSchema
+- updateProfileSchema, updateAvatarSchema
+- createConsultationSchema, updateConsultationSchema
 
-// ===============================================
-// 📤 EXPORT ADDITIONAL TYPES
-// ===============================================
+TYPES EXPORTADOS:
+- CreatePatientData, UpdatePatientData
+- CreateServiceData, UpdateServiceData
+- CreateAppointmentData, CreateReminderData
+- UpdateProfileData, CreateConsultationData
+- ActionResponse<T>
 
-export type PatientSearchData = z.infer<typeof patientSearchSchema>
-export type AppointmentStatus = z.infer<typeof appointmentStatusSchema>
+COMO USAR:
+import { validateCPF, createPatientSchema, type CreatePatientData } from '@/lib/validations'
+*/
