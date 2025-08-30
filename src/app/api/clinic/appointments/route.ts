@@ -45,7 +45,9 @@ export const GET = auth(async function GET(request) {
       },
       include: {
         service: true,
-      }
+        patient: true
+      },
+      orderBy: { appointmentDate: 'asc' }
     })
 
     return NextResponse.json(appointments)

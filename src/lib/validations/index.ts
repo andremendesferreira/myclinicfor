@@ -209,15 +209,22 @@ export const toggleServiceStatusSchema = z.object({
 // ===============================================
 
 export const createAppointmentSchema = z.object({
-  name: nameSchema,
-  email: emailSchema,
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Email inválido"),
   phone: phoneSchema,
   cpf: cpfSchema,
   serviceId: z.string().uuid("Serviço inválido"),
-  appointmentDate: z.date().min(new Date(), "Data deve ser futura"),
-  time: z
-    .string()
-    .regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Horário inválido"),
+  appointmentDate: z.date(),
+  time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Horário inválido"),
+  patientId: z.string().uuid().optional(), // ✅ NOVO campo opcional
+  clinicId: z.string().cuid().optional() // Para appointments públicos
+})
+
+export const createAppointmentWithPatientSchema = z.object({
+  patientId: z.string().uuid("ID do paciente inválido"),
+  serviceId: z.string().uuid("Serviço inválido"),
+  appointmentDate: z.date(),
+  time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Horário inválido"),
 })
 
 export const updateAppointmentStatusSchema = z.object({
@@ -313,9 +320,11 @@ export type UpdatePatientData = z.infer<typeof updatePatientSchema>
 export type CreateServiceData = z.infer<typeof createServiceSchema>
 export type UpdateServiceData = z.infer<typeof updateServiceSchema>
 export type CreateAppointmentData = z.infer<typeof createAppointmentSchema>
+export type CreateAppointmentWithPatientData = z.infer<typeof createAppointmentWithPatientSchema> // ✅ NOVO
+export type CreateConsultationData = z.infer<typeof createConsultationSchema>
+export type UpdateConsultationData = z.infer<typeof updateConsultationSchema>
 export type CreateReminderData = z.infer<typeof createReminderSchema>
 export type UpdateProfileData = z.infer<typeof updateProfileSchema>
-export type CreateConsultationData = z.infer<typeof createConsultationSchema>
 
 // ===============================================
 // 🔄 ACTION RESPONSE TYPE
@@ -327,34 +336,3 @@ export interface ActionResponse<T = any> {
   error?: string
   fieldErrors?: Record<string, string[]>
 }
-
-// ===============================================
-// 📋 EXPORT SUMMARY
-// ===============================================
-
-/*
-UTILITIES EXPORTADAS:
-- validateCPF(cpf: string): boolean
-- formatCPF(cpf: string): string
-- formatPhone(phone: string): string
-- capitalizeProperNames(name: string): string
-- formatCurrency(value: number): string
-
-SCHEMAS EXPORTADOS:
-- createPatientSchema, updatePatientSchema
-- createServiceSchema, updateServiceSchema, toggleServiceStatusSchema
-- createAppointmentSchema, updateAppointmentStatusSchema, cancelAppointmentSchema
-- createReminderSchema, updateReminderSchema
-- updateProfileSchema, updateAvatarSchema
-- createConsultationSchema, updateConsultationSchema
-
-TYPES EXPORTADOS:
-- CreatePatientData, UpdatePatientData
-- CreateServiceData, UpdateServiceData
-- CreateAppointmentData, CreateReminderData
-- UpdateProfileData, CreateConsultationData
-- ActionResponse<T>
-
-COMO USAR:
-import { validateCPF, createPatientSchema, type CreatePatientData } from '@/lib/validations'
-*/

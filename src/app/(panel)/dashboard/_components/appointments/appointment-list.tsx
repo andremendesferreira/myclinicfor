@@ -30,6 +30,7 @@ import { LifeLine } from "react-loading-indicators"
 export type AppointmentWithService = Prisma.AppointmentGetPayload<{
   include: {
     service: true,
+    patient: true
   }
 }>
 
@@ -206,14 +207,19 @@ export function AppointmentsList({ times }: AppointmentsListProps) {
                           >
                             <div className='w-16 text-sm font-semibold pl-1'>{slot}</div>
                             <div className='flex-1 text-sm'>
-                              <div className='font-semibold'>{occupant.name}</div>
+                              <div className='font-semibold'>
+                                {occupant.patient?.nome || occupant.name}
+                                {occupant.patient && (
+                                  <span className="ml-2 text-green-600 text-xs">👤</span>
+                                )}
+                              </div>
                               <div className='text-sm text-gray-500'>
                                 <Link
-                                  href={`https://wa.me/${extractFormatPhone(occupant.phone, true)}?text=Olá%20${occupant.name.toString().split(' ')[0]}!%20Por%20favor,%20confirme%20sua%20presença%20na%20consulta%20agendada%20para%20${occupant.appointmentDate.toString().split('T')[0].split('-').reverse().join('/')}%20às%20${occupant.time}.%20Responda%20esta%20mensagem%20para%20confirmar.`}
+                                  href={`https://wa.me/${extractFormatPhone(occupant.patient?.telefone || occupant.phone, true)}?text=Olá%20${(occupant.patient?.nome || occupant.name).toString().split(' ')[0]}!%20Por%20favor,%20confirme%20sua%20presença%20na%20consulta%20agendada%20para%20${occupant.appointmentDate.toString().split('T')[0].split('-').reverse().join('/')}%20às%20${occupant.time}.%20Responda%20esta%20mensagem%20para%20confirmar.`}
                                   target="_blank"
                                   rel="Abrir WhatsApp"
                                 >
-                                  {`💬${formatPhone(occupant.phone)}`}
+                                  {`💬${formatPhone(occupant.patient?.telefone || occupant.phone)}`}
                                 </Link>
                               </div>
                             </div>

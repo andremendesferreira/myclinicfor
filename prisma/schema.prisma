@@ -16,21 +16,29 @@ datasource db {
 
 model Appointment {
   id              String   @id @default(uuid())
-  name            String // Nome do pacient
+  name            String
   email           String
   phone           String
-  appointmentDate DateTime // Data do agendamento
-  time            String // horário escolhido
-  cpf             String @default("") // CPF do paciente
+  appointmentDate DateTime
+  time            String
+  cpf             String @default("") // Manter para compatibilidade
 
-  serviceId String // id do serviço agendado
+  // ✅ NOVO: Relacionamento opcional com Patient
+  patientId       String?
+  patient         Patient? @relation(fields: [patientId], references: [id], onDelete: SetNull)
+
+  serviceId String
   service   Service @relation(fields: [serviceId], references: [id])
 
-  userId String // id da clinica (user)
+  userId String
   user   User   @relation(fields: [userId], references: [id])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  
+  // ✅ NOVO: Índices para performance
+  @@index([patientId])
+  @@index([cpf]) // Para buscas por CPF
 }
 
 model Reminder {
@@ -68,6 +76,7 @@ model Patient {
   cpf         String   @unique
   telefone    String
   email       String   @unique
+  endereco    String?  // ✅ Campo do formulário
   userId      String
   status      Boolean  @default(true)
   createdAt   DateTime @default(now())
@@ -76,8 +85,8 @@ model Patient {
   // Relacionamentos
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   consultations Consultation[]
+  appointments  Appointment[]  // ✅ NOVO: Relacionamento reverso
   
-  // Índices para melhorar performance
   @@index([userId])
   @@index([cpf])
   @@map("patients")
