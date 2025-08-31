@@ -8,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { createPatient } from "../_act/create-patient"
 import { useCreatePatientForm } from "@/lib/validations/hooks"
 import { formatPhone, formatCPF } from "@/lib/validations"
+import { capitalizeProperNames } from "@/app/utils/formatName"
 import { msgError, msgSuccess, msgWarning, msgInfo, msgLoading } from "@/components/custom-toast"
 import { toast } from "sonner"
 import { MapPin, Search, Loader2 } from "lucide-react"
@@ -299,30 +300,29 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      
-      {/* 👤 DADOS PESSOAIS */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Dados Pessoais</h3>
-        
+      <div className="space-y-4">       
         {/* Nome */}
         <div>
-          <Label htmlFor="nome">Nome Completo *</Label>
+          <Label htmlFor="nome" className="mb-1">Nome Completo *</Label>
           <Input
             id="nome"
             {...register("nome")}
             placeholder="Digite o nome completo do paciente"
             disabled={isLoading}
             className={errors.nome ? "border-red-500" : ""}
+            onChange={(e) => {
+              const formattedValue = capitalizeProperNames(e.target.value);
+              setValue('nome', formattedValue);
+            }}
           />
           {errors.nome?.message && (
             <p className="text-sm text-red-500 mt-1">{String(errors.nome.message)}</p>
           )}
         </div>
-
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* CPF */}
           <div>
-            <Label htmlFor="cpf">CPF *</Label>
+            <Label htmlFor="cpf" className="mb-1">CPF *</Label>
             <Input
               id="cpf"
               {...register("cpf")}
@@ -339,7 +339,7 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
 
           {/* Data de Nascimento */}
           <div>
-            <Label htmlFor="dataNascimento">Data de Nascimento</Label>
+            <Label htmlFor="dataNascimento" className="mb-1">Data de Nascimento</Label>
             <Input
               id="dataNascimento"
               type="date"
@@ -355,7 +355,7 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
 
         {/* Endereço */}
         <div>
-          <Label htmlFor="endereco">Endereço</Label>
+          <Label htmlFor="endereco" className="mb-1">Endereço</Label>
           <div className="flex gap-2">
             <Input
               id="endereco"
@@ -394,15 +394,9 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
             <p className="text-sm text-red-500 mt-1">{String(errors.endereco.message)}</p>
           )}
         </div>
-      </div>
-
-      {/* 📞 CONTATOS */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Contatos</h3>
-        
         {/* Telefone */}
         <div>
-          <Label htmlFor="telefone">Telefone Principal *</Label>
+          <Label htmlFor="telefone" className="mb-1">Telefone *</Label>
           <Input
             id="telefone"
             {...register("telefone")}
@@ -416,10 +410,9 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
             <p className="text-sm text-red-500 mt-1">{String(errors.telefone.message)}</p>
           )}
         </div>
-
         {/* Email */}
         <div>
-          <Label htmlFor="email">Email *</Label>
+          <Label htmlFor="email" className="mb-1">Email *</Label>
           <Input
             id="email"
             type="email"
@@ -431,16 +424,10 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
           {errors.email?.message && (
             <p className="text-sm text-red-500 mt-1">{String(errors.email.message)}</p>
           )}
-        </div>
-      </div>
-
-      {/* 🏥 CONVÊNIO */}
-      <div className="space-y-4">
-        <h3 className="text-lg font-medium text-gray-900">Convênio (Opcional)</h3>
-        
+        </div>       
         {/* Convênio */}
         <div>
-          <Label htmlFor="convenio">Nome do Convênio</Label>
+          <Label htmlFor="convenio" className="mb-1">Nome do Convênio</Label>
           <Input
             id="convenio"
             {...register("convenio")}
@@ -453,13 +440,12 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
           )}
         </div>
       </div>
-
       {/* BOTÕES */}
-      <div className="flex gap-3 pt-6 border-t">
+      <div className="flex gap-3">
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="flex-1"
+          className="flex-1 bg-blue-700 hover:bg-blue-600 hover:shadow-blue-200 hover:shadow-md disabled:opacity-50"
         >
           {isLoading ? "Cadastrando..." : "Cadastrar Paciente"}
         </Button>

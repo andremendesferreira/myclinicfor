@@ -5,7 +5,7 @@ import { redirect } from "next/navigation"
 import { verifyPermission } from "@/app/utils/permissions/verify-permission"
 import { LabelSubscription } from "@/components/label-subscription"
 import { PatientsHeader } from "./_components/patients-header"
-import { PatientsList } from "./_components/patients-list"
+import { PatientsListClientWrapper } from "./_components/patients-list-client-wrapper"
 import { PatientsStats } from "./_components/patients-stats"
 import { getPatients } from "./_dta/get-patients"
 
@@ -53,8 +53,14 @@ export default async function PatientsPage() {
   )
 }
 
-// Wrapper para buscar os dados dos pacientes
+// Server Component que busca os dados iniciais
 async function PatientsListWrapper({ userId }: { userId: string }) {
   const patients = await getPatients({ userId })
-  return <PatientsList patients={patients} />
+  
+  return (
+    <PatientsListClientWrapper 
+      initialPatients={patients} 
+      userId={userId}
+    />
+  )
 }

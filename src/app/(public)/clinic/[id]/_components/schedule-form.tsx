@@ -19,6 +19,9 @@ export const appointmentSchema = z.object({
     .refine((cpf) => validateCPF(cpf), "CPF inválido"),
   date: z.date(),
   serviceId: z.string().min(1, "O serviço é obrigatório"),
+  dataNascimento: z.date().optional(),
+  endereco: z.string().optional(),
+  convenio: z.string().optional()
 })
 
 export type AppointmentFormData = z.infer<typeof appointmentSchema>
@@ -31,6 +34,9 @@ export function useAppointmentForm() {
       email: "",
       cpf: "",
       phone: "",
+      endereco: "",
+      dataNascimento: undefined,
+      convenio: "",
       serviceId: "",
       date: new Date(),
     }

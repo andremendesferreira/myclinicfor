@@ -76,7 +76,9 @@ model Patient {
   cpf         String   @unique
   telefone    String
   email       String   @unique
-  endereco    String?  // ✅ Campo do formulário
+  endereco    String?  @default("")
+  convenio    String?  @default("")
+  dataNascimento DateTime?
   userId      String
   status      Boolean  @default(true)
   createdAt   DateTime @default(now())

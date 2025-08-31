@@ -20,6 +20,10 @@ const formSchema = z.object({
   serviceId: z.string().min(1, "O serviço é obrigatório"),
   time: z.string().min(1, "O horário é obrigatório"),
   clinicId: z.string().min(1, "A clínica é obrigatória"),
+  // ✅ NOVOS CAMPOS OPCIONAIS
+  endereco: z.string().optional(),
+  dataNascimento: z.date().optional(), 
+  convenio: z.string().optional()
 })
 
 type FormSchema = z.infer<typeof formSchema>
@@ -41,7 +45,7 @@ export async function createNewAppointment(formData: FormSchema) {
     const day = selectedDate.getDate();
     const appointmentDate = new Date(Date.UTC(year, month, day, 0, 0, 0, 0))
 
-    // ✅ NOVO: Buscar ou criar paciente automaticamente
+    // ✅ Buscar ou criar paciente automaticamente
     let patient = await prisma.patient.findUnique({
       where: { cpf: formData.cpf }
     })
@@ -49,34 +53,72 @@ export async function createNewAppointment(formData: FormSchema) {
     // Se o paciente não existe, criar automaticamente
     if (!patient) {
       try {
+        // Preparar dados do patient (apenas campos que existem no schema)
+        const patientData: any = {
+          nome: formData.name,
+          cpf: formData.cpf,
+          telefone: formData.phone,
+          email: formData.email,
+          userId: formData.clinicId
+        }
+
+        // ✅ Adicionar campos opcionais apenas se fornecidos
+        if (formData.endereco) {
+          patientData.endereco = formData.endereco
+        }
+
+        // Nota: dataNascimento e convenio podem não existir no schema Patient ainda
+        // Descomente se os campos existirem no schema:
+        // if (formData.dataNascimento) {
+        //   patientData.dataNascimento = formData.dataNascimento
+        // }
+        // if (formData.convenio) {
+        //   patientData.convenio = formData.convenio
+        // }
+
         patient = await prisma.patient.create({
-          data: {
-            nome: formData.name,
-            cpf: formData.cpf,
-            telefone: formData.phone,
-            email: formData.email,
-            userId: formData.clinicId
-          }
+          data: patientData
         })
-        console.log(`✅ Paciente criado automaticamente: ${patient.nome} (${patient.cpf})`)
+        
+        console.log(`Paciente criado automaticamente: ${patient.nome} (${patient.cpf})`)
+        
       } catch (patientError: any) {
-        // Se houver erro de email duplicado, tentar buscar por email
-        if (patientError?.code === 'P2002' && patientError?.meta?.target?.includes('email')) {
-          // Buscar paciente pelo email para usar o existente
-          patient = await prisma.patient.findUnique({
-            where: { email: formData.email }
-          })
+        // Tratamento de erro de unique constraint
+        if (patientError?.code === 'P2002') {
+          const target = patientError?.meta?.target || []
           
-          if (!patient) {
-            throw new Error('Erro ao criar paciente: email já cadastrado')
+          if (target.includes('email')) {
+            // Buscar paciente pelo email para usar o existente
+            patient = await prisma.patient.findUnique({
+              where: { email: formData.email }
+            })
+            
+            if (!patient) {
+              return { error: "Este email já está cadastrado para outro paciente" }
+            }
+            console.log(`Paciente encontrado por email: ${patient.nome}`)
+          } 
+          else if (target.includes('cpf')) {
+            return { error: "Este CPF já está cadastrado" }
+          }
+          else {
+            return { error: "Dados já cadastrados para outro paciente" }
           }
         } else {
-          throw patientError
+          console.error('Erro ao criar patient:', patientError)
+          return { error: "Erro ao processar dados do paciente" }
         }
       }
+    } else {
+      console.log(`Paciente existente encontrado: ${patient.nome}`)
     }
 
-    // Criar dados do appointment
+    // Verificar se patient foi criado/encontrado
+    if (!patient) {
+      return { error: "Erro ao processar dados do paciente" }
+    }
+
+    // ✅ Criar appointment com relacionamento
     const appointmentData = {
       name: formData.name,
       email: formData.email,
@@ -86,7 +128,7 @@ export async function createNewAppointment(formData: FormSchema) {
       appointmentDate: appointmentDate,
       serviceId: formData.serviceId,
       userId: formData.clinicId,
-      patientId: patient.id  // ✅ NOVO: Relacionamento com patient
+      patientId: patient.id // ✅ Relacionamento automático
     }
     
     const newAppointment = await prisma.appointment.create({
@@ -97,7 +139,8 @@ export async function createNewAppointment(formData: FormSchema) {
             id: true,
             nome: true,
             email: true,
-            telefone: true
+            telefone: true,
+            endereco: true
           }
         },
         service: {
@@ -116,20 +159,24 @@ export async function createNewAppointment(formData: FormSchema) {
     }
 
   } catch (err) {
-    console.log('Erro ao criar appointment:', err);
+    console.error('Erro ao criar appointment:', err);
     
     // Tratamento de erros específicos
     if (err instanceof Error) {
-      if (err.message.includes('email já cadastrado')) {
-        return { error: "Este email já está cadastrado para outro paciente" }
-      }
-      if (err.message.includes('Unique constraint')) {
+      // Erro de agendamento duplicado
+      if (err.message.includes('Unique constraint') || 
+          (err as any)?.code === 'P2002') {
         return { error: "Já existe um agendamento para este horário" }
+      }
+      
+      // Erro de serviço não encontrado
+      if (err.message.includes('Foreign key constraint')) {
+        return { error: "Serviço selecionado não está disponível" }
       }
     }
     
     return {
-      error: "Erro ao cadastrar agendamento"
+      error: "Erro interno. Tente novamente em alguns instantes."
     }
   }
 }
