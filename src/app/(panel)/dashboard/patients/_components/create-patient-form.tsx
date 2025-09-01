@@ -15,7 +15,7 @@ import { Loader2, UserPlus, AlertCircle } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import type { CreatePatientData } from "@/lib/validations"
+import type { CreatePatientForm } from "@/lib/validations"
 
 // Importar os componentes divididos
 import { PersonalInfoSection } from "./personal-info-section"
@@ -36,7 +36,7 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
   // 🚀 SUBMIT HANDLER
   // ===============================================
 
-  const onSubmit = async (data: CreatePatientData) => {
+  const onSubmit = async (data: CreatePatientForm) => {
     setIsLoading(true)
     
     const loadingToastId = msgLoading("Cadastrando paciente...")
@@ -81,7 +81,7 @@ export function CreatePatientForm({ onSuccess }: CreatePatientFormProps) {
       <CardHeader className="border-0 mt-0 pt-0">
         <CardTitle className="flex items-center gap-2 p-0">
           <UserPlus className="w-5 h-5" />
-          Novo Paciente
+          <span className="text-lg">Novo Paciente</span>
         </CardTitle>
       </CardHeader>
       <CardContent className="mt-0 pt-0">

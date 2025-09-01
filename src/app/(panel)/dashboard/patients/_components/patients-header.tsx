@@ -47,6 +47,7 @@ export function PatientsHeader({ hasPermission }: PatientsHeaderProps) {
             </Button>
           </DialogTrigger>
           <DialogContent  className="lg:min-w-lg sm:max-w-md w-full p-0 m-0 [&>button]:hidden">
+            <DialogTitle hidden className="m-0! p-0!">Novo Paciente</DialogTitle>
           <DialogHeader className="p-0 m-0">
               <DialogClose className="absolute right-1 mt-2">
                 <Button

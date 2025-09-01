@@ -23,7 +23,9 @@ import {
   type CreateReminderData,
   type UpdateProfileData,
   type CreateConsultationData,
-  type ActionResponse
+  type ActionResponse,
+  type CreatePatientForm,
+  type CreatePatientInput
 } from './index'
 
 // ===============================================
@@ -40,9 +42,9 @@ export function useCreatePatientForm(options?: { defaultValues?: Partial<CreateP
     endereco: "",
     convenio: "",
     ...options?.defaultValues
-  } as CreatePatientData
+  } 
 
-  return useForm({
+  return useForm<CreatePatientInput, any, CreatePatientForm>({
     resolver: zodResolver(createPatientSchema),
     defaultValues
   })

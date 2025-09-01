@@ -9,10 +9,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { formatPhone } from "@/lib/validations"
 import type { UseFormReturn } from "react-hook-form"
-import type { CreatePatientData } from "@/lib/validations"
+import type { CreatePatientInput } from "@/lib/validations"
 
 interface ContactInfoSectionProps {
-  form: UseFormReturn<CreatePatientData>
+  form: UseFormReturn<CreatePatientInput>
   isLoading: boolean
 }
 

@@ -15,10 +15,10 @@ import { formatCPF } from "@/lib/validations"
 import { capitalizeProperNames } from "@/app/utils/formatName"
 import { AddressSelector } from "@/components/AddressSelector"
 import type { UseFormReturn } from "react-hook-form"
-import type { CreatePatientData } from "@/lib/validations"
+import type { CreatePatientInput } from "@/lib/validations"
 
 interface PersonalInfoSectionProps {
-  form: UseFormReturn<CreatePatientData>
+  form: UseFormReturn<CreatePatientInput>
   isLoading: boolean
 }
 

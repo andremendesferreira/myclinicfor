@@ -144,26 +144,28 @@ export const createPatientSchema = z.object({
   cpf: cpfSchema,
   telefone: phoneSchema,
   email: emailSchema,
-  dataNascimento: 
-  // z.preprocess(
-  //   (value) => {
-  //     if (value === "") return undefined
-  //     if (typeof value === "string") return undefined
-  //   },
-    z.date()
-    .max(new Date(), "Data de nascimento deve ser no passado")
-    .optional(),
-    // z.union([z.date(), z.undefined()]).refine(
-    //   (val) => val === undefined || val <= new Date(),
-    //   "Data de nascimento deve ser no passado"
-    // ).optional(),
-  //)
+  dataNascimento:z.preprocess((arg) => {
+    // Se o campo vier vazio "", nulo ou undefined, ele se torna undefined
+    // Isso garante que a validação `.optional()` funcione corretamente.
+    if (!arg || arg === "") return undefined;
+    // Se não for vazio, o valor segue para a próxima validação (coerce).
+    return arg;
+  }, z.coerce.date({
+      // Mensagem de erro customizada caso a data seja inválida (ex: "31/02/2024")
+      errorMap: () => ({ message: "Por favor, insira uma data válida." }),
+    })
+    .max(new Date(), "A data de nascimento não pode ser no futuro.")
+    .optional()
+  ),
   endereco: z.string().max(200, "Endereço muito longo").optional(),
   convenio: z.string().max(100, "Nome do convênio muito longo").optional(),
 })
 
-// ✅ agora o infer pega `Date | undefined`, não `unknown`
-export type CreatePatientForm = z.infer<typeof createPatientSchema>
+// Tipo de SAÍDA (o que você já tem, usado no onSubmit)
+export type CreatePatientForm = z.infer<typeof createPatientSchema>;
+
+// Tipo de ENTRADA (para ser usado no hook useForm)
+export type CreatePatientInput = z.input<typeof createPatientSchema>;
 
 export const updatePatientSchema = createPatientSchema.partial().extend({
   id: z.string().uuid("ID do paciente inválido"),

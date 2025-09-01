@@ -8,10 +8,10 @@
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import type { UseFormReturn } from "react-hook-form"
-import type { CreatePatientData } from "@/lib/validations"
+import type { CreatePatientInput } from "@/lib/validations"
 
 interface InsuranceInfoSectionProps {
-  form: UseFormReturn<CreatePatientData>
+  form: UseFormReturn<CreatePatientInput>
   isLoading: boolean
 }
 
