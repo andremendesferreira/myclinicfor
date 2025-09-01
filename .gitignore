@@ -20,6 +20,7 @@
 _bkp
 _bkp/*
 *.backup
+*_bkp.*
 
 # next.js
 /.next/

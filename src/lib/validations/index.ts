@@ -125,9 +125,15 @@ const emailSchema = z
 
 const nameSchema = z
   .string()
-  .min(2, "Nome deve ter pelo menos 2 caracteres")
-  .max(100, "Nome muito longo")
-  .transform(capitalizeProperNames)
+  .min(5, "Nome completo deve ter pelo menos 5 caracteres")
+  .max(100, "Nome completo muito longo")
+  .refine((val) => val.replace(/[^A-Za-zÀ-ÿ]/g, "").length >= 5, {
+    message: "Nome completo deve conter pelo menos 5 caracteres",
+  })
+  .refine((val) => val.includes(" "), {
+    message: "Nome completo deve conter sobrenome.",
+  })
+  .transform(capitalizeProperNames);
 
 // ===============================================
 // 👥 PATIENT SCHEMAS
@@ -138,35 +144,32 @@ export const createPatientSchema = z.object({
   cpf: cpfSchema,
   telefone: phoneSchema,
   email: emailSchema,
-  dataNascimento: z
-    .date()
+  dataNascimento: 
+  // z.preprocess(
+  //   (value) => {
+  //     if (value === "") return undefined
+  //     if (typeof value === "string") return undefined
+  //   },
+    z.date()
     .max(new Date(), "Data de nascimento deve ser no passado")
     .optional(),
-  endereco: z
-    .string()
-    .max(200, "Endereço muito longo")
-    .optional(),
-  profissao: z
-    .string()
-    .max(100, "Profissão muito longa")
-    .optional(),
-  estadoCivil: z
-    .enum(['solteiro', 'casado', 'divorciado', 'viuvo', 'uniao_estavel'])
-    .optional(),
-  contatoEmergencia: phoneSchema.optional(),
-  convenio: z
-    .string()
-    .max(100, "Nome do convênio muito longo")
-    .optional(),
-  numeroConvenio: z
-    .string()
-    .max(50, "Número do convênio muito longo")
-    .optional(),
+    // z.union([z.date(), z.undefined()]).refine(
+    //   (val) => val === undefined || val <= new Date(),
+    //   "Data de nascimento deve ser no passado"
+    // ).optional(),
+  //)
+  endereco: z.string().max(200, "Endereço muito longo").optional(),
+  convenio: z.string().max(100, "Nome do convênio muito longo").optional(),
 })
+
+// ✅ agora o infer pega `Date | undefined`, não `unknown`
+export type CreatePatientForm = z.infer<typeof createPatientSchema>
 
 export const updatePatientSchema = createPatientSchema.partial().extend({
   id: z.string().uuid("ID do paciente inválido"),
 })
+export type UpdatePatientForm = z.infer<typeof updatePatientSchema>
+
 
 // ===============================================
 // 🛠️ SERVICE SCHEMAS

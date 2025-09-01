@@ -1,198 +1,107 @@
+// ================================================================
+// ❌ CANCEL APPOINTMENT - Server Action Corrigida
+// ================================================================
+// Arquivo: src/app/(panel)/dashboard/_act/cancel-appointment.ts
+
 "use server"
 
 import { auth } from '@/lib/auth'
-import { createServerAction } from '@/lib/server-actions/template'
-import { createPatientSchema } from '@/lib/validations'
+import { revalidatePath } from 'next/cache'
 import prisma from '@/lib/prisma'
-import { Prisma } from '@/generated/prisma'
+import { cancelAppointmentSchema } from '@/lib/validations'
+import type { ActionResponse } from '@/lib/validations'
 
-/**
- * Server Action para criar um novo paciente
- * 
- * Funcionalidades:
- * - Verificação de autenticação obrigatória
- * - Validação de limites do plano do usuário
- * - Sanitização e formatação automática de dados
- * - Verificação de duplicatas inteligente
- * - Logs de auditoria para rastreabilidade
- * - Tratamento específico de erros de negócio
- */
-export const createPatient = createServerAction(
-  createPatientSchema,
-  'Paciente',
-  async (data, userId) => {
-    // 1. Verificar autenticação
+// ===============================================
+// 🚨 SERVER ACTION - cancelAppointment
+// ===============================================
+
+export async function cancelAppointment(input: unknown): Promise<ActionResponse> {
+  try {
+    // 1. Validar dados de entrada
+    const validatedData = cancelAppointmentSchema.parse(input)
+    
+    // 2. Verificar autenticação
     const session = await auth()
     
     if (!session?.user?.id) {
-      throw new Error('Acesso negado. Faça login para continuar.')
+      return {
+        success: false,
+        error: 'Acesso negado. Faça login para continuar.'
+      }
     }
 
-    const authenticatedUserId = session.user.id
+    const userId = session.user.id
 
-    // 2. Verificar limites do plano (se aplicável)
-    const [userWithSubscription, currentPatientCount] = await Promise.all([
-      prisma.user.findUnique({
-        where: { id: authenticatedUserId },
-        select: {
-          id: true,
-          name: true,
-          subscription: {
-            select: {
-              plan: true,
-              status: true
+    // 3. Verificar se o agendamento existe e pertence ao usuário
+    const appointment = await prisma.appointment.findFirst({
+      where: { 
+        id: validatedData.appointmentId,
+        // Verificar se o agendamento pertence ao usuário (pelo service ou diretamente)
+        OR: [
+          { userId: userId }, // Agendamentos diretos do usuário
+          { 
+            service: {
+              userId: userId // Agendamentos através de serviços do usuário
             }
           }
-        }
-      }),
-      prisma.patient.count({
-        where: { 
-          userId: authenticatedUserId,
-          status: true 
-        }
-      })
-    ])
-
-    if (!userWithSubscription) {
-      throw new Error('Usuário não encontrado')
-    }
-
-    // Definir limites por plano (ajustar conforme necessário)
-    const planLimits = {
-      FREE: 10,
-      BASIC: 50,
-      PREMIUM: 200,
-      PROFESSIONAL: 1000,
-      TOP: Infinity
-    }
-
-    const userPlan = userWithSubscription.subscription?.plan || 'FREE'
-    const maxPatients = planLimits[userPlan as keyof typeof planLimits] || planLimits.FREE
-
-    if (currentPatientCount >= maxPatients) {
-      throw new Error(`Limite de ${maxPatients} pacientes atingido para o plano ${userPlan}. Faça upgrade para continuar.`)
-    }
-
-    // 3. Sanitizar e formatar dados de entrada
-    const sanitizedData = {
-      nome: data.nome?.trim() || '',
-      cpf: data.cpf?.replace(/\D/g, '') || '', // Remove formatação
-      telefone: data.telefone?.replace(/\D/g, '') || '', // Remove formatação
-      email: data.email?.toLowerCase().trim() || '',
-      endereco: data.endereco?.trim() || '',
-      convenio: data.convenio?.trim() || ''
-    }
-
-    // 4. Verificar duplicatas antes de criar
-    const existingPatient = await prisma.patient.findFirst({
-      where: {
-        userId: authenticatedUserId,
-        OR: [
-          { cpf: sanitizedData.cpf },
-          { email: sanitizedData.email }
-        ],
-        status: true
+        ]
       },
-      select: {
-        id: true,
-        nome: true,
-        cpf: true,
-        email: true
+      include: {
+        patient: {
+          select: {
+            nome: true
+          }
+        },
+        service: {
+          select: {
+            name: true
+          }
+        }
       }
     })
 
-    if (existingPatient) {
-      if (existingPatient.cpf === sanitizedData.cpf) {
-        throw new Error(`Paciente com CPF ${data.cpf} já está cadastrado.`)
-      }
-      if (existingPatient.email === sanitizedData.email) {
-        throw new Error(`Paciente com email ${sanitizedData.email} já está cadastrado.`)
+    if (!appointment) {
+      return {
+        success: false,
+        error: 'Agendamento não encontrado ou você não tem permissão para cancelá-lo.'
       }
     }
 
-    // 5. Preparar dados para criação
-    const patientData: Prisma.PatientCreateInput = {
-      nome: sanitizedData.nome,
-      cpf: sanitizedData.cpf,
-      telefone: sanitizedData.telefone,
-      email: sanitizedData.email,
-      user: {
-        connect: { id: authenticatedUserId }
+    // 4. Cancelar o agendamento (soft delete ou hard delete)
+    await prisma.appointment.delete({
+      where: { 
+        id: validatedData.appointmentId 
+      }
+    })
+
+    // 5. Revalidar cache das páginas relacionadas
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/appointments')
+    
+    // 6. Log da ação (opcional)
+    console.log(`📅 Agendamento cancelado: ${appointment.patient?.nome || 'Paciente'} - ${appointment.service.name}`)
+
+    // 7. Retornar sucesso
+    return {
+      success: true,
+      data: `Agendamento de ${appointment.patient?.nome || 'paciente'} cancelado com sucesso.`
+    }
+
+  } catch (error) {
+    console.error('❌ Erro ao cancelar agendamento:', error)
+    
+    // Tratar erros de validação do Zod
+    if (error && typeof error === 'object' && 'issues' in error) {
+      return {
+        success: false,
+        error: 'Dados inválidos fornecidos.',
+        fieldErrors: (error as any).flatten?.()?.fieldErrors
       }
     }
 
-    // Adicionar campos opcionais apenas se fornecidos
-    if (sanitizedData.endereco) {
-      patientData.endereco = sanitizedData.endereco
+    return {
+      success: false,
+      error: 'Erro interno do servidor. Tente novamente.'
     }
-
-    if (sanitizedData.convenio) {
-      patientData.convenio = sanitizedData.convenio
-    }
-
-    // Adicionar data de nascimento se fornecida e campo existir no schema
-    if (data.dataNascimento) {
-      (patientData as any).dataNascimento = data.dataNascimento
-    }
-
-    try {
-      // 6. Criar paciente com transação para garantir consistência
-      const newPatient = await prisma.$transaction(async (tx) => {
-        // Criar o paciente
-        const patient = await tx.patient.create({
-          data: patientData,
-          select: {
-            id: true,
-            nome: true,
-            email: true,
-            cpf: true,
-            telefone: true,
-            endereco: true,
-            convenio: true,
-            status: true,
-            createdAt: true,
-            user: {
-              select: {
-                name: true
-              }
-            }
-          }
-        })
-
-        // Log de auditoria (opcional - implementar conforme necessário)
-        console.log(`📝 Paciente criado: ${patient.nome} (${patient.cpf}) por usuário ${authenticatedUserId}`)
-
-        return patient
-      })
-
-      return newPatient
-
-    } catch (error) {
-      // 7. Tratamento específico de erros do Prisma
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        switch (error.code) {
-          case 'P2002':
-            // Unique constraint violation
-            const field = (error.meta?.target as string[])?.join(', ') || 'dados'
-            throw new Error(`Paciente com ${field} já existe no sistema.`)
-          
-          case 'P2003':
-            // Foreign key constraint violation
-            throw new Error('Erro de referência de dados. Verifique se todos os dados estão corretos.')
-          
-          case 'P2025':
-            // Record not found
-            throw new Error('Usuário não encontrado no sistema.')
-          
-          default:
-            console.error('Erro do Prisma ao criar paciente:', error)
-            throw new Error('Erro interno do banco de dados. Tente novamente.')
-        }
-      }
-
-      // Re-lançar outros erros
-      throw error
-    }
-  },
-  ['/dashboard/patients']
-)
+  } 
+}

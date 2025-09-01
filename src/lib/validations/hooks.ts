@@ -38,11 +38,7 @@ export function useCreatePatientForm(options?: { defaultValues?: Partial<CreateP
     email: "",
     dataNascimento: undefined,
     endereco: "",
-    profissao: "",
-    estadoCivil: undefined,
-    contatoEmergencia: "",
     convenio: "",
-    numeroConvenio: "",
     ...options?.defaultValues
   } as CreatePatientData
 

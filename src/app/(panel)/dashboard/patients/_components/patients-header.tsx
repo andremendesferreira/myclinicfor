@@ -2,11 +2,12 @@
 "use client"
 
 import { useState } from "react"
-import { Plus, Search, Filter } from "lucide-react"
+import { Plus, Search, Filter, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
   Dialog,
+  DialogClose,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -35,7 +36,6 @@ export function PatientsHeader({ hasPermission }: PatientsHeaderProps) {
             Gerencie o cadastro de pacientes.
           </p>
         </div>
-
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button 
@@ -46,12 +46,18 @@ export function PatientsHeader({ hasPermission }: PatientsHeaderProps) {
               Novo Paciente
             </Button>
           </DialogTrigger>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Cadastrar de Paciente</DialogTitle>
-              <DialogDescription>
-                Preencha os dados do paciente para cadastrá-lo no sistema.
-              </DialogDescription>
+          <DialogContent  className="lg:min-w-lg sm:max-w-md w-full p-0 m-0 [&>button]:hidden">
+          <DialogHeader className="p-0 m-0">
+              <DialogClose className="absolute right-1 mt-2">
+                <Button
+                  className="mr-1"
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setIsCreateDialogOpen(false)}
+                >
+                  <X className='w-4 h-4' />
+                </Button>
+              </DialogClose>
             </DialogHeader>
             <CreatePatientForm onSuccess={() => setIsCreateDialogOpen(false)} />
           </DialogContent>
