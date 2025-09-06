@@ -1,14 +1,23 @@
 // ================================================================
 // 👀 PATIENT VIEW MODAL - Modal de Visualização de Paciente
 // ================================================================
-// Arquivo: src/app/(panel)/dashboard/patients/_components/_patient/patient-view-modal.tsx
+// Modal ajustado baseado no modelo patient-edit-modal.tsx
+// Com imports corretos e estrutura consistente
 
 "use client"
 
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Eye, Phone, Mail, FileText, MapPin, X } from "lucide-react"
-import { formatCPF, formatPhone } from "@/lib/validations"
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Eye, Phone, Mail, FileText, MapPin, X, Calendar, Heart } from "lucide-react"
+import { formatCPF } from "@/lib/validations" // ✅ CORRIGIDO: Import correto
+import { formatPhone } from "@/app/utils/formatPhone" // ✅ CORRIGIDO: Import correto
 
 interface Patient {
   id: string
@@ -18,6 +27,7 @@ interface Patient {
   email: string
   endereco?: string
   convenio?: string
+  dataNascimento?: Date | string // ✅ ADICIONADO: Campo data de nascimento
   status: boolean
   createdAt: Date
   updatedAt: Date
@@ -33,38 +43,54 @@ interface ViewPatientModalProps {
 }
 
 export function ViewPatientModal({ patient, isOpen, onClose }: ViewPatientModalProps) {
-  if (!isOpen || !patient) return null
+  if (!patient) return null
 
-  const handleBackdropClick = (e: React.MouseEvent) => {
-    if (e.target === e.currentTarget) {
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
       onClose()
     }
   }
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      onClose()
+  // ✅ ADICIONADO: Função para calcular idade
+  const calculateAge = (birthDate: Date | string) => {
+    if (!birthDate) return null
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
     }
+    
+    return age
   }
 
   return (
-    <div 
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
-      onClick={handleBackdropClick}
-      onKeyDown={handleKeyDown}
-      tabIndex={-1}
-    >
-      <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <Eye className="w-5 h-5" />
-            Detalhes do Paciente
-          </h2>
-          <Button variant="ghost" size="icon" onClick={onClose}>
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-        
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <DialogContent className="lg:min-w-lg sm:max-w-2xl w-full p-0 m-0 [&>button]:hidden">
+        {/* HEADER */}
+        <DialogHeader className="p-0 m-0">
+          <DialogTitle className="pl-6 pt-6 mb-0 mr-0 ml-0 flex flex-row items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Eye className="w-5 h-5" />
+              Detalhes do Paciente
+            </div>
+            {/* ✅ CORRIGIDO: Usando asChild para evitar button dentro de button */}
+            <DialogClose asChild>
+              <Button
+                className="absolute right-1 mt-0 mr-5"
+                variant="ghost"
+                size="icon"
+                onClick={onClose}
+              >
+                <X className='w-4 h-4' />
+              </Button>
+            </DialogClose>
+          </DialogTitle>
+        </DialogHeader>
+
+        {/* CONTENT */}
         <div className="p-6 space-y-6">
           {/* Cabeçalho com avatar e nome */}
           <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg">
@@ -84,6 +110,12 @@ export function ViewPatientModal({ patient, isOpen, onClose }: ViewPatientModalP
                     {patient._count.consultations} consulta{patient._count.consultations !== 1 ? 's' : ''}
                   </Badge>
                 )}
+                {/* ✅ ADICIONADO: Badge com idade se tiver data de nascimento */}
+                {patient.dataNascimento && (
+                  <Badge variant="outline" className="bg-green-50 text-green-700">
+                    {calculateAge(patient.dataNascimento)} anos
+                  </Badge>
+                )}
               </div>
             </div>
           </div>
@@ -98,7 +130,7 @@ export function ViewPatientModal({ patient, isOpen, onClose }: ViewPatientModalP
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <Phone className="w-3 h-3 text-gray-400" />
-                  <span>{formatPhone(patient.telefone)}</span>
+                  <span>{formatPhone(patient.telefone)}</span> {/* ✅ CORRIGIDO: formatPhone correto */}
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="w-3 h-3 text-gray-400" />
@@ -115,10 +147,25 @@ export function ViewPatientModal({ patient, isOpen, onClose }: ViewPatientModalP
               <div className="space-y-2 text-sm">
                 <div className="flex items-center gap-2">
                   <span className="text-gray-600">CPF:</span>
-                  <span className="font-mono">{formatCPF(patient.cpf)}</span>
+                  <span className="font-mono">{formatCPF(patient.cpf)}</span> {/* ✅ CORRIGIDO: formatCPF correto */}
                 </div>
+                {/* ✅ ADICIONADO: Mostrar data de nascimento se existir */}
+                {patient.dataNascimento && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-3 h-3 text-gray-400" />
+                    <span className="text-gray-600">Nascimento:</span>
+                    <span>
+                      {new Date(patient.dataNascimento).toLocaleDateString('pt-BR', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric'
+                      })}
+                    </span>
+                  </div>
+                )}
                 {patient.convenio && (
                   <div className="flex items-center gap-2">
+                    <Heart className="w-3 h-3 text-gray-400" />
                     <span className="text-gray-600">Convênio:</span>
                     <span>{patient.convenio}</span>
                   </div>
@@ -155,7 +202,7 @@ export function ViewPatientModal({ patient, isOpen, onClose }: ViewPatientModalP
             Fechar
           </Button>
         </div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   )
 }

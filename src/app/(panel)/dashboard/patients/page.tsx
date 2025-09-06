@@ -4,7 +4,7 @@ import getSession from "@/lib/getSession"
 import { redirect } from "next/navigation"
 import { verifyPermission } from "@/app/utils/permissions/verify-permission"
 import { LabelSubscription } from "@/components/label-subscription"
-import { PatientsHeader } from "./_components/patients-header"
+import { PatientsHeaderSimple } from "./_components/patients-header-simple"
 import { PatientsListClientWrapper } from "./_components/patients-list-client-wrapper"
 import { PatientsStats } from "./_components/patients-stats"
 import { getPatients } from "./_dta/get-patients"
@@ -29,10 +29,10 @@ export default async function PatientsPage() {
         />
       )}
 
-      {/* Header da página */}
-      <PatientsHeader hasPermission={permission.hasPermission} />
+      {/* ✅ 1º - Header da página (só título + botão) */}
+      <PatientsHeaderSimple hasPermission={permission.hasPermission} />
 
-      {/* Estatísticas */}
+      {/* ✅ 2º - Estatísticas (posição original) */}
       <Suspense fallback={
         <div className="flex items-center justify-center h-32">
           <LifeLine color="#3191cc" size="medium" text="" textColor="" />
@@ -41,26 +41,36 @@ export default async function PatientsPage() {
         <PatientsStats userId={session.user?.id!} />
       </Suspense>
 
-      {/* Lista de pacientes */}
+      {/* ✅ 3º - Lista de pacientes (com pesquisa integrada) */}
       <Suspense fallback={
         <div className="flex items-center justify-center h-64">
           <LifeLine color="#3191cc" size="medium" text="" textColor="" />
         </div>
       }>
-        <PatientsListWrapper userId={session.user?.id!} />
+        <PatientsListWrapper 
+          userId={session.user?.id!} 
+          hasPermission={permission.hasPermission}
+        />
       </Suspense>
     </main>
   )
 }
 
 // Server Component que busca os dados iniciais
-async function PatientsListWrapper({ userId }: { userId: string }) {
+async function PatientsListWrapper({ 
+  userId, 
+  hasPermission 
+}: { 
+  userId: string
+  hasPermission: boolean 
+}) {
   const patients = await getPatients({ userId })
   
   return (
     <PatientsListClientWrapper 
       initialPatients={patients} 
       userId={userId}
+      hasPermission={hasPermission}
     />
   )
 }

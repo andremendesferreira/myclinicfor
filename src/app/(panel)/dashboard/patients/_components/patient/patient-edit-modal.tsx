@@ -21,12 +21,11 @@ import {
 } from "@/components/ui/dialog"
 import { Edit, Loader2, X, AlertCircle } from "lucide-react"
 import { useCreatePatientForm } from "@/lib/validations/hooks"
-import { formatPhone, formatCPF } from "@/lib/validations"
+import { formatPhone } from "@/app/utils/formatPhone" // ✅ CORRIGIDO: Import correto
 import { capitalizeProperNames } from "@/app/utils/formatName"
 import { msgError, msgSuccess, msgLoading } from "@/components/custom-toast"
 import { toast } from "sonner"
 import { updatePatient } from "../../_act/update-patient"
-import type { CreatePatientForm } from "@/lib/validations"
 
 // ===============================================
 // 🔧 INTERFACES
@@ -80,8 +79,8 @@ export function EditPatientModal({
       // Preencher todos os campos com os dados do paciente
       setValue('nome', patient.nome)
       setValue('cpf', patient.cpf)
-      setValue('telefone', patient.telefone)
-      setValue('email', (formatPhone(patient.email)))
+      setValue('telefone', formatPhone(patient.telefone)) // ✅ CORRIGIDO: Formatar telefone ao carregar
+      setValue('email', patient.email) // ✅ CORRIGIDO: Removido formatPhone do email
       setValue('endereco', patient.endereco || '')
       setValue('dataNascimento', patient.dataNascimento || '')
       setValue('convenio', patient.convenio || '')
@@ -123,7 +122,7 @@ export function EditPatientModal({
   // 🚀 SUBMIT HANDLER
   // ===============================================
 
-  const onSubmit = async (data: CreatePatientForm) => {
+  const onSubmit = async (data: any) => { // ✅ CORRIGIDO: Usando any ao invés de CreatePatientForm
     if (!patient) return
     
     setIsLoading(true)
@@ -134,10 +133,10 @@ export function EditPatientModal({
         patientId: patient.id,
         data: {
           nome: data.nome,
-          telefone: data.telefone,
+          telefone: data.telefone?.replace(/\D/g, ''), // ✅ CORRIGIDO: Remover formatação para salvar
           email: data.email,
           endereco: data.endereco,
-          dataNascimento: data.dataNascimento,
+          dataNascimento: data.dataNascimento ? new Date(data.dataNascimento + 'T00:00:00.000Z') : undefined, // ✅ CORRIGIDO: Converter data
           convenio: data.convenio
         }
       })
@@ -182,9 +181,10 @@ export function EditPatientModal({
         <DialogHeader className="p-0 m-0">
           <DialogTitle className="pl-4 mt-4 mb-0 mr-0 ml-0 flex flex-row items-center justify-between">
             Editar Paciente
-            <DialogClose className="absolute right-1 m-0 p-0">
+            {/* ✅ CORRIGIDO: Usando asChild para evitar button dentro de button */}
+            <DialogClose asChild>
               <Button
-                className="mr-1"
+                className="absolute right-1 mt-0 mr-1"
                 variant="ghost"
                 size="icon"
                 onClick={handleClose} 

@@ -1,12 +1,12 @@
 // ================================================================
-// 📋 PATIENTS LIST - Componente Principal Modular
+// 📋 PATIENTS LIST - INTERFACE CORRIGIDA
 // ================================================================
 
 "use client"
 
 import { useState, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Users } from "lucide-react"
+import { Users, Search } from "lucide-react" // ✅ ADICIONAR Search
 import { msgError, msgSuccess } from "@/components/custom-toast"
 import { togglePatientStatus } from "../_act/toggle-patient-status"
 import { PatientCard } from "./patient/patient-card"
@@ -29,12 +29,21 @@ interface Patient {
   }
 }
 
+// ✅ INTERFACE CORRIGIDA
 interface PatientsListProps {
   patients: Patient[]
   onPatientUpdate: () => void
+  isLoading?: boolean     // ✅ NOVA PROP
+  searchTerm?: string    // ✅ NOVA PROP
 }
 
-export function PatientsList({ patients, onPatientUpdate }: PatientsListProps) {
+// ✅ FUNÇÃO CORRIGIDA
+export function PatientsList({ 
+  patients, 
+  onPatientUpdate,
+  isLoading = false,     // ✅ NOVA PROP
+  searchTerm = ''        // ✅ NOVA PROP
+}: PatientsListProps) {
   // Estados simples e isolados
   const [viewPatient, setViewPatient] = useState<Patient | null>(null)
   const [editPatient, setEditPatient] = useState<Patient | null>(null)
@@ -102,7 +111,26 @@ export function PatientsList({ patients, onPatientUpdate }: PatientsListProps) {
   // 🎨 RENDERIZAÇÃO
   // ===============================================
 
-  if (patients.length === 0) {
+  // ✅ NOVO: Estado vazio com pesquisa
+  if (patients.length === 0 && searchTerm) {
+    return (
+      <Card>
+        <CardContent className="flex flex-col items-center justify-center py-12">
+          <Search className="h-12 w-12 text-gray-400 mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Nenhum resultado encontrado
+          </h3>
+          <p className="text-gray-600 text-center mb-4">
+            Não encontramos pacientes com <strong>"{searchTerm}"</strong>.<br />
+            Tente pesquisar por outro termo ou verifique a ortografia.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
+  // Estado vazio original (sem pesquisa)
+  if (patients.length === 0 && !searchTerm) {
     return (
       <Card>
         <CardContent className="flex flex-col items-center justify-center py-12">
@@ -126,7 +154,20 @@ export function PatientsList({ patients, onPatientUpdate }: PatientsListProps) {
             <span className="flex items-center gap-2">
               <Users className="h-5 w-5" />
               Pacientes ({patients.length})
+              {/* ✅ NOVO: Indicador de pesquisa ativa */}
+              {searchTerm && (
+                <span className="text-sm font-normal text-blue-600">
+                  • Filtrado
+                </span>
+              )}
             </span>
+            {/* ✅ NOVO: Loading indicator */}
+            {isLoading && (
+              <div className="flex items-center gap-2 text-sm text-gray-500">
+                <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                Buscando...
+              </div>
+            )}
           </CardTitle>
         </CardHeader>
         
